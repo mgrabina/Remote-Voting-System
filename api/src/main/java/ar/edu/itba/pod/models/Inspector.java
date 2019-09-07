@@ -1,6 +1,8 @@
 package ar.edu.itba.pod.models;
 
-public class Inspector {
+import java.io.Serializable;
+
+public class Inspector implements Serializable {
     private String table;
     private String party;
 

@@ -1,9 +1,10 @@
 package ar.edu.itba.pod.models;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Optional;
 
-public class Vote {
+public class Vote implements Serializable {
 
     private String table;
     private String province;
