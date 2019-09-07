@@ -19,7 +19,7 @@ public class QueryClient {
         QueryService queryService = (QueryService) Naming.lookup(Constants.queryServiceHost + "queryService");
 
         // Can get results
-        queryService.getResults(VotingDimension.NATIONAL);
+        queryService.getResults(VotingDimension.NATIONAL, null);
     }
 
 }

@@ -6,6 +6,7 @@ import ar.edu.itba.pod.constants.VotingSystems;
 import ar.edu.itba.pod.services.AdministrationService;
 import ar.edu.itba.pod.services.QueryService;
 import ar.edu.itba.pod.constants.VotingDimension;
+import ar.edu.itba.pod.services.VotingService;
 
 import java.net.MalformedURLException;
 import java.rmi.Naming;
@@ -18,11 +19,13 @@ import java.util.Optional;
 public class QueryServiceImpl extends UnicastRemoteObject implements QueryService {
 
     private AdministrationService administrationService;
+    private VotingService votingService;
 
 
     public QueryServiceImpl() throws RemoteException, MalformedURLException, NotBoundException {
         super();
         this.administrationService = (AdministrationService) Naming.lookup(Constants.administrationServiceHost + "administrationService");
+        this.votingService = (VotingService) Naming.lookup(Constants.votingServiceHost + "votingService");
     }
 
     @Override

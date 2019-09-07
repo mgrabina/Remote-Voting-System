@@ -11,6 +11,8 @@ import ar.edu.itba.pod.services.VotingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.MalformedURLException;
+import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -24,7 +26,7 @@ public class Server {
      * Starts the server binding all the service's implementations
      *
      */
-    public static void main(String[] args) throws RemoteException {
+    public static void main(String[] args) throws RemoteException, MalformedURLException, NotBoundException {
         logger.info("Initializing services...");
         AdministrationService administrationService = new AdministrationServiceImpl();
         InspectionService inspectionService = new InspectionServiceImpl();
