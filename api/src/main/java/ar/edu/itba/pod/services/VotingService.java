@@ -9,5 +9,4 @@ import java.util.List;
 public interface VotingService extends Remote {
 
     void vote (Vote vote) throws RemoteException;
-    List<Vote> getVotes() throws RemoteException;
 }

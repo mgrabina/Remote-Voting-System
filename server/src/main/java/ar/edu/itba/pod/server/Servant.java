@@ -62,8 +62,7 @@ public class Servant extends UnicastRemoteObject implements AdministrationServic
         this.callbaks.put(new Inspector(table, party), callback);
     }
 
-    @Override
-    public void alertInspector(Vote vote) throws RemoteException {
+    private void alertInspector(Vote vote) throws RemoteException {
         callbaks.entrySet().parallelStream()
                 .filter(e -> e.getKey().getTable().equals(vote.getTable()))
                 .filter(e -> e.getKey().getParty().equals(vote.getFirstSelection()) ||
@@ -81,7 +80,7 @@ public class Servant extends UnicastRemoteObject implements AdministrationServic
     @Override
     public Map<String, Double> getResults(VotingDimension dimension, Optional<String> filter) throws RemoteException {
 
-        List<Vote> votes = this.getVotes();
+        List<Vote> votes = this.votes;
 
         switch (this.getElectionsState()){
             case NON_INITIALIZED: throw new IllegalStateException("Elections didn't started yet.");
@@ -144,10 +143,5 @@ public class Servant extends UnicastRemoteObject implements AdministrationServic
         }
         this.votes.add(vote);
         this.alertInspector(vote);
-    }
-
-    @Override
-    public List<Vote> getVotes() throws RemoteException {
-        return votes;
     }
 }
