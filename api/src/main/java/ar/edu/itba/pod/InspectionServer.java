@@ -5,5 +5,5 @@ import java.rmi.RemoteException;
 
 public interface InspectionServer extends Remote {
 
-    void regiterInspector(InspectorCallback callback) throws RemoteException;
+    void registerInspector(InspectorCallback callback) throws RemoteException;
 }

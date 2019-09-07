@@ -13,7 +13,7 @@ public class InspectionServiceImpl extends UnicastRemoteObject implements Inspec
     }
 
     @Override
-    public void regiterInspector(InspectorCallback callback) throws RemoteException {
+    public void registerInspector(InspectorCallback callback) throws RemoteException {
 
     }
 }
