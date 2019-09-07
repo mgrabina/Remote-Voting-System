@@ -34,6 +34,6 @@ public class VotingServiceImpl extends UnicastRemoteObject implements VotingServ
             throw new IllegalStateException("There aren't elections running.");
         }
         this.votes.add(vote);
-        // Alert Inspector
+        inspectionService.alertInspector(vote);
     }
 }
