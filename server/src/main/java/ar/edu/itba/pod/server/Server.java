@@ -15,20 +15,20 @@ public class Server {
     private static Logger logger = LoggerFactory.getLogger(Server.class);
 
     public static void main(String[] args) throws RemoteException {
-        System.out.print("[Initializing services...");
+        logger.info("Initializing services...");
         AdministrationService administrationService = new AdministrationServiceImpl();
         InspectionService inspectionService = new InspectionServiceImpl();
         QueryService queryService = new QueryServiceImpl();
         VotingService votingService = new VotingServiceImpl();
         final Registry registry = LocateRegistry.getRegistry();
         registry.rebind("administrationService", administrationService);
-        System.out.print(" ... ");
+        logger.info(" ... ");
         registry.rebind("inspectionService", inspectionService);
-        System.out.print(" ... ");
+        logger.info(" ... ");
         registry.rebind("queryService", queryService);
-        System.out.print(" ... ");
+        logger.info(" ... ");
         registry.rebind("votingService", votingService);
-        System.out.println(" DONE! ]");
+        logger.info(" DONE! ");
     }
 
 }
