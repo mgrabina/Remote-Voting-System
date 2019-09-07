@@ -1,4 +1,6 @@
-package ar.edu.itba.pod;
+package ar.edu.itba.pod.services;
+
+import ar.edu.itba.pod.callbacks.InspectorCallback;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;

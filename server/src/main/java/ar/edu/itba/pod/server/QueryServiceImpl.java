@@ -1,7 +1,7 @@
 package ar.edu.itba.pod.server;
 
-import ar.edu.itba.pod.QueryService;
-import ar.edu.itba.pod.VotingDimension;
+import ar.edu.itba.pod.services.QueryService;
+import ar.edu.itba.pod.constants.VotingDimension;
 
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;

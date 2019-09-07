@@ -1,8 +1,8 @@
-package ar.edu.itba.pod.server;
+package ar.edu.itba.pod.server.classExamples;
 
-import ar.edu.itba.pod.User;
-import ar.edu.itba.pod.UserAvailableCallbackHandler;
-import ar.edu.itba.pod.UserService;
+import ar.edu.itba.pod.classExamples.User;
+import ar.edu.itba.pod.classExamples.UserAvailableCallbackHandler;
+import ar.edu.itba.pod.classExamples.UserService;
 
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;

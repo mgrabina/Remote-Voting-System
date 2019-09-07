@@ -1,6 +1,4 @@
-package ar.edu.itba.pod;
-
-import ar.edu.itba.pod.User;
+package ar.edu.itba.pod.classExamples;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;

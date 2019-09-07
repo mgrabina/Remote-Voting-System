@@ -1,7 +1,9 @@
 package ar.edu.itba.pod.server;
 
-import ar.edu.itba.pod.GenericService;
-import ar.edu.itba.pod.UserService;
+import ar.edu.itba.pod.services.AdministrationService;
+import ar.edu.itba.pod.services.InspectionService;
+import ar.edu.itba.pod.services.QueryService;
+import ar.edu.itba.pod.services.VotingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,12 +15,20 @@ public class Server {
     private static Logger logger = LoggerFactory.getLogger(Server.class);
 
     public static void main(String[] args) throws RemoteException {
-        System.out.println("Services initializing");
-        GenericService gs = new GenericServiceImpl();
-        UserService us = new UserServiceImpl();
+        System.out.print("[Initializing services...");
+        AdministrationService administrationService = new AdministrationServiceImpl();
+        InspectionService inspectionService = new InspectionServiceImpl();
+        QueryService queryService = new QueryServiceImpl();
+        VotingService votingService = new VotingServiceImpl();
         final Registry registry = LocateRegistry.getRegistry();
-        registry.rebind("genericServer", gs);
-        registry.rebind("userServer", us);
-        System.out.println("Services bound");
+        registry.rebind("administrationService", administrationService);
+        System.out.print(" ... ");
+        registry.rebind("inspectionService", inspectionService);
+        System.out.print(" ... ");
+        registry.rebind("queryService", queryService);
+        System.out.print(" ... ");
+        registry.rebind("votingService", votingService);
+        System.out.println(" DONE! ]");
     }
+
 }

@@ -1,4 +1,4 @@
-package ar.edu.itba.pod;
+package ar.edu.itba.pod.classExamples;
 
 import java.io.Serializable;
 import java.rmi.Remote;

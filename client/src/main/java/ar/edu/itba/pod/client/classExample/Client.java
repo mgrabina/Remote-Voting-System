@@ -1,8 +1,8 @@
-package ar.edu.itba.pod.client;
+package ar.edu.itba.pod.client.classExample;
 
-import ar.edu.itba.pod.GenericService;
-import ar.edu.itba.pod.User;
-import ar.edu.itba.pod.UserService;
+import ar.edu.itba.pod.classExamples.GenericService;
+import ar.edu.itba.pod.classExamples.User;
+import ar.edu.itba.pod.classExamples.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

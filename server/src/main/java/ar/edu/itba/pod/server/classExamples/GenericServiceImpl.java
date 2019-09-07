@@ -1,16 +1,13 @@
-package ar.edu.itba.pod.server;
+package ar.edu.itba.pod.server.classExamples;
 
-import ar.edu.itba.pod.GenericService;
+import ar.edu.itba.pod.classExamples.GenericService;
 
-import javax.swing.text.html.Option;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.LinkedList;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.locks.Lock;
 
 /**
  * Basic implementation of {@link GenericService}.

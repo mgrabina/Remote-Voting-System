@@ -1,7 +1,7 @@
 package ar.edu.itba.pod.server;
 
-import ar.edu.itba.pod.AdministrationService;
-import ar.edu.itba.pod.ElectionsState;
+import ar.edu.itba.pod.services.AdministrationService;
+import ar.edu.itba.pod.constants.ElectionsState;
 
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;

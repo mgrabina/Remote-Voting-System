@@ -1,7 +1,7 @@
 package ar.edu.itba.pod.server;
 
-import ar.edu.itba.pod.InspectionService;
-import ar.edu.itba.pod.InspectorCallback;
+import ar.edu.itba.pod.services.InspectionService;
+import ar.edu.itba.pod.callbacks.InspectorCallback;
 
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
