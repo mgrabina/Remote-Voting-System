@@ -1,4 +1,4 @@
-package ar.edu.itba.pod.server;
+package ar.edu.itba.pod.server.serviceClients;
 
 import ar.edu.itba.pod.services.AdministrationService;
 import ar.edu.itba.pod.constants.ElectionsState;

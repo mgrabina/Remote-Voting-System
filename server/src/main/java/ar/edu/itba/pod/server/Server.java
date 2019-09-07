@@ -1,5 +1,9 @@
 package ar.edu.itba.pod.server;
 
+import ar.edu.itba.pod.server.serviceClients.AdministrationServiceImpl;
+import ar.edu.itba.pod.server.serviceClients.InspectionServiceImpl;
+import ar.edu.itba.pod.server.serviceClients.QueryServiceImpl;
+import ar.edu.itba.pod.server.serviceClients.VotingServiceImpl;
 import ar.edu.itba.pod.services.AdministrationService;
 import ar.edu.itba.pod.services.InspectionService;
 import ar.edu.itba.pod.services.QueryService;

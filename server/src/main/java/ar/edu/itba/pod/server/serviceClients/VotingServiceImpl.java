@@ -1,4 +1,4 @@
-package ar.edu.itba.pod.server;
+package ar.edu.itba.pod.server.serviceClients;
 
 import ar.edu.itba.pod.models.Vote;
 import ar.edu.itba.pod.services.VotingService;
