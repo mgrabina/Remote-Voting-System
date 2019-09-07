@@ -1,14 +1,14 @@
 package ar.edu.itba.pod.server;
 
 import ar.edu.itba.pod.Vote;
-import ar.edu.itba.pod.VotingServer;
+import ar.edu.itba.pod.VotingService;
 
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 
-public class VotingServerImpl extends UnicastRemoteObject implements VotingServer {
+public class VotingServiceImpl extends UnicastRemoteObject implements VotingService {
 
-    protected VotingServerImpl() throws RemoteException {
+    protected VotingServiceImpl() throws RemoteException {
         super();
     }
 
