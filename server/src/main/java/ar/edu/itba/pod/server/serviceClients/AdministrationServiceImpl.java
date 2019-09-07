@@ -10,7 +10,7 @@ public class AdministrationServiceImpl extends UnicastRemoteObject implements Ad
 
     private ElectionsState electionsState;
 
-    protected AdministrationServiceImpl() throws RemoteException {
+    public AdministrationServiceImpl() throws RemoteException {
         super();
         this.electionsState = ElectionsState.NON_INITIALIZED;
     }

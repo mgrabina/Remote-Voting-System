@@ -10,7 +10,7 @@ import java.util.Map;
 public class QueryServiceImpl extends UnicastRemoteObject implements QueryService {
 
 
-    protected QueryServiceImpl() throws RemoteException {
+    public QueryServiceImpl() throws RemoteException {
         super();
     }
 

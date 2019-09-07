@@ -8,7 +8,7 @@ import java.rmi.server.UnicastRemoteObject;
 
 public class InspectionServiceImpl extends UnicastRemoteObject implements InspectionService {
 
-    protected InspectionServiceImpl() throws RemoteException {
+    public InspectionServiceImpl() throws RemoteException {
         super();
     }
 

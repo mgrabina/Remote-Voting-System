@@ -8,7 +8,7 @@ import java.rmi.server.UnicastRemoteObject;
 
 public class VotingServiceImpl extends UnicastRemoteObject implements VotingService {
 
-    protected VotingServiceImpl() throws RemoteException {
+    public VotingServiceImpl() throws RemoteException {
         super();
     }
 

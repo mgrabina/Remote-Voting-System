@@ -18,6 +18,12 @@ import java.rmi.registry.Registry;
 public class Server {
     private static Logger logger = LoggerFactory.getLogger(Server.class);
 
+
+    /**
+     *
+     * Starts the server binding all the service's implementations
+     *
+     */
     public static void main(String[] args) throws RemoteException {
         logger.info("Initializing services...");
         AdministrationService administrationService = new AdministrationServiceImpl();
