@@ -3,6 +3,7 @@ package ar.edu.itba.pod.server.serviceClients;
 import ar.edu.itba.pod.constants.Constants;
 import ar.edu.itba.pod.constants.ElectionsState;
 import ar.edu.itba.pod.constants.VotingSystems;
+import ar.edu.itba.pod.models.Vote;
 import ar.edu.itba.pod.services.AdministrationService;
 import ar.edu.itba.pod.services.QueryService;
 import ar.edu.itba.pod.constants.VotingDimension;
@@ -13,6 +14,7 @@ import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 

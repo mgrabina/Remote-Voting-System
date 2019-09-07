@@ -11,6 +11,7 @@ import ar.edu.itba.pod.callbacks.InspectorCallback;
 import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
+import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;
@@ -39,7 +40,7 @@ public class InspectionServiceImpl extends UnicastRemoteObject implements Inspec
     }
 
     @Override
-    public void alertInspector(Vote vote){
+    public void alertInspector(Vote vote) throws RemoteException {
         callbaks.entrySet().parallelStream()
                 .filter(e -> e.getKey().getTable().equals(vote.getTable()))
                 .filter(e -> e.getKey().getParty().equals(vote.getFirstSelection()) ||

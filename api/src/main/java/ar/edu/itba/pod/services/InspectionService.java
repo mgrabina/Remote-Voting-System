@@ -9,5 +9,5 @@ import java.rmi.RemoteException;
 public interface InspectionService extends Remote {
 
     void registerInspector(String table, String party, InspectorCallback callback) throws RemoteException, IllegalStateException;
-    void alertInspector(Vote vote);
+    void alertInspector(Vote vote) throws RemoteException;
 }

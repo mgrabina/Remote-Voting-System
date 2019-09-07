@@ -12,7 +12,9 @@ import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class VotingServiceImpl extends UnicastRemoteObject implements VotingService {
@@ -37,4 +39,11 @@ public class VotingServiceImpl extends UnicastRemoteObject implements VotingServ
         this.votes.add(vote);
         inspectionService.alertInspector(vote);
     }
+
+    @Override
+    public List<Vote> getVotes() throws RemoteException {
+        return votes;
+    }
+
+
 }
