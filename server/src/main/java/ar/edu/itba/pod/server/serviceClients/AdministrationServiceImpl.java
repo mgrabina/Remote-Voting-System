@@ -16,7 +16,7 @@ public class AdministrationServiceImpl extends UnicastRemoteObject implements Ad
     }
 
     @Override
-    public void openElections() throws RemoteException {
+    public void openElections() throws RemoteException, IllegalStateException {
         if (this.electionsState != ElectionsState.NON_INITIALIZED){
             throw new IllegalStateException("Elections currently running or finished.");
         }
@@ -24,7 +24,7 @@ public class AdministrationServiceImpl extends UnicastRemoteObject implements Ad
     }
 
     @Override
-    public void closeElections() throws RemoteException {
+    public void closeElections() throws RemoteException, IllegalStateException {
         if (this.electionsState != ElectionsState.RUNNING){
             throw new IllegalStateException("Elections not running.");
         }

@@ -1,5 +1,6 @@
 package ar.edu.itba.pod.client;
 
+import ar.edu.itba.pod.constants.Constants;
 import ar.edu.itba.pod.services.AdministrationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,7 +14,7 @@ public class AdministrationClient {
     private static Logger logger = LoggerFactory.getLogger(AdministrationClient.class);
 
     public static void main(String[] args) throws RemoteException, MalformedURLException, NotBoundException {
-        AdministrationService administrationService = (AdministrationService) Naming.lookup("//127.0.0.1/administrationService");
+        AdministrationService administrationService = (AdministrationService) Naming.lookup(Constants.administrationServiceHost + "administrationService");
 
         // Can manage elections
         administrationService.openElections();

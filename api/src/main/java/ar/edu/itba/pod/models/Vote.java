@@ -1,17 +1,22 @@
 package ar.edu.itba.pod.models;
 
 import java.util.List;
+import java.util.Optional;
 
 public class Vote {
 
     private String table;
     private String province;
-    private List<String> politicalParties;
+    private String firstSelection;
+    private String secondSelection;
+    private String thirdSelection;
 
-    public Vote(String table, String province, List<String> politicalParties) {
+    public Vote(String table, String province, String firstSelection, String secondSelection, String thirdSelection) {
         this.table = table;
         this.province = province;
-        this.politicalParties = politicalParties;
+        this.firstSelection = firstSelection;
+        this.secondSelection = secondSelection;
+        this.thirdSelection = thirdSelection;
     }
 
     public String getTable() {
@@ -22,7 +27,15 @@ public class Vote {
         return province;
     }
 
-    public List<String> getPoliticalParties() {
-        return politicalParties;
+    public String getFirstSelection() {
+        return firstSelection;
+    }
+
+    public Optional<String> getSecondSelection() {
+        return Optional.ofNullable(secondSelection);
+    }
+
+    public Optional<String> getThirdSelection() {
+        return Optional.ofNullable(thirdSelection);
     }
 }

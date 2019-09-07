@@ -7,5 +7,5 @@ import java.rmi.RemoteException;
 
 public interface InspectionService extends Remote {
 
-    void registerInspector(InspectorCallback callback) throws RemoteException;
+    void registerInspector(String table, String party, InspectorCallback callback) throws RemoteException, IllegalStateException;
 }

@@ -1,5 +1,6 @@
 package ar.edu.itba.pod.client;
 
+import ar.edu.itba.pod.constants.Constants;
 import ar.edu.itba.pod.constants.VotingDimension;
 import ar.edu.itba.pod.services.AdministrationService;
 import ar.edu.itba.pod.services.QueryService;
@@ -15,7 +16,7 @@ public class QueryClient {
     private static Logger logger = LoggerFactory.getLogger(QueryClient.class);
 
     public static void main(String[] args) throws RemoteException, MalformedURLException, NotBoundException {
-        QueryService queryService = (QueryService) Naming.lookup("//127.0.0.1/queryService");
+        QueryService queryService = (QueryService) Naming.lookup(Constants.queryServiceHost + "queryService");
 
         // Can get results
         queryService.getResults(VotingDimension.NATIONAL);
