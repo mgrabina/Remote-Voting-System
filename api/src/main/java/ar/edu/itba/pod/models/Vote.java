@@ -6,6 +6,7 @@ import java.util.Optional;
 
 public class Vote implements Serializable {
 
+    private static final long serialVersionUID = 8383170378958425496L;
     private String table;
     private String province;
     private String firstSelection;

@@ -16,12 +16,18 @@ import java.rmi.Naming;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Servant extends UnicastRemoteObject implements AdministrationService, VotingService, QueryService, InspectionService {
 
     private ElectionsState electionsState;
     private HashMap<Inspector, InspectorCallback> callbaks;
-    private List<Vote> votes;
+    private Map<String, Map<String, List<Vote>>> votes;
+    private Map<String, String> tableProvinceMap;
 
 
 
@@ -29,7 +35,8 @@ public class Servant extends UnicastRemoteObject implements AdministrationServic
         super();
         this.electionsState = ElectionsState.NON_INITIALIZED;
         this.callbaks = new HashMap<>();
-        this.votes = new ArrayList<>();
+        this.votes = new ConcurrentHashMap<>();
+        this.tableProvinceMap = new HashMap<>();
 
     }
 
@@ -79,17 +86,14 @@ public class Servant extends UnicastRemoteObject implements AdministrationServic
 
     @Override
     public Map<String, Double> getResults(VotingDimension dimension, Optional<String> filter) throws RemoteException {
-
-        List<Vote> votes = this.votes;
-
         switch (this.getElectionsState()){
             case NON_INITIALIZED: throw new IllegalStateException("Elections didn't started yet.");
-            case RUNNING: return calculatPartialResults(votes, filter);
+            case RUNNING: return calculatePartialResults(dimension, filter);
             case FINISHED:
                 switch (dimension){
-                    case NATIONAL: return calculateNationalResults(votes, filter);
-                    case PROVINCE: return calculateProvinceResults(votes, filter);
-                    case TABLE: return calculateTableResults(votes, filter);
+                    case NATIONAL: return calculateNationalResults();
+                    case PROVINCE: return calculateProvinceResults(filter);
+                    case TABLE: return calculateTableResults(filter);
                     default: throw new IllegalStateException("Invalid Dimension.");
                 }
             default: throw new IllegalStateException("Invalid Election State.");
@@ -97,30 +101,58 @@ public class Servant extends UnicastRemoteObject implements AdministrationServic
     }
 
 
-    private Map<String, Double> calculateNationalResults(List<Vote> votes, Optional<String> filter){
+    private Map<String, Double> calculateNationalResults(){
+        List<Vote> nationalVotes = this.votes.values().stream().map(Map::values).
+                flatMap(Collection::stream).flatMap(Collection::stream).collect(Collectors.toList());
+        return calculateResultWithAV(nationalVotes);
+    }
 
-        if (filter.isPresent()){
-            throw new IllegalArgumentException("Unnecessary argument for National Voting.");
+    private Map<String, Double> calculateProvinceResults(Optional<String> filter){
+        if (!filter.isPresent()){
+            throw new IllegalStateException("Filter not found.");
         }
-
-        //HashMap<String, Double> hs = new HashSet();
-
-        //AV
-        return null;
+        List<Vote> provinceVotes = this.votes.get(filter.get()).values().stream().
+                flatMap(Collection::stream).collect(Collectors.toList());
+        return calculateResultWithSTV(provinceVotes);
     }
 
-    private Map<String, Double> calculateProvinceResults(List<Vote> votes, Optional<String> filter){
-        //STV
-        return null;
+    private Map<String, Double> calculateTableResults(Optional<String> filter){
+        if (!filter.isPresent()){
+            throw new IllegalStateException("Filter not found.");
+        }
+        String province = tableProvinceMap.get(filter.get());
+        List<Vote> tableVotes = this.votes.get(province).get(filter.get());
+        return calculateResultWithFPTP(tableVotes);
     }
 
-    private Map<String, Double> calculateTableResults(List<Vote> votes, Optional<String> filter){
-
-        return null;
+    private Map<String, Double> calculatePartialResults(VotingDimension dimension, Optional<String> filter){
+        switch (dimension){
+            case NATIONAL:
+                List<Vote> nationalVotes = this.votes.values().stream().map(Map::values).
+                        flatMap(Collection::stream).flatMap(Collection::stream).collect(Collectors.toList());
+                return calculateResultWithFPTP(nationalVotes);
+            case PROVINCE:
+                List<Vote> provinceVotes = this.votes.get(filter.get()).values().stream().
+                        flatMap(Collection::stream).collect(Collectors.toList());
+                return calculateResultWithFPTP(provinceVotes);
+            case TABLE:
+                String province = tableProvinceMap.get(filter.get());
+                List<Vote> tableVotes = this.votes.get(province).get(filter.get());
+                return calculateResultWithFPTP(tableVotes);
+            default: throw new IllegalStateException("Invalid Dimension.");
+        }
     }
 
-    private Map<String, Double> calculatPartialResults(List<Vote> votes, Optional<String> filter){
-        //votes.
+    private Map<String, Double> calculateResultWithAV(List<Vote> votes){
+        // TODO Implement
+        return null;
+    }
+    private Map<String, Double> calculateResultWithSTV(List<Vote> votes){
+        // TODO Implement
+        return null;
+    }
+    private Map<String, Double> calculateResultWithFPTP(List<Vote> votes){
+        // TODO Implement
         return null;
     }
 
@@ -141,7 +173,12 @@ public class Servant extends UnicastRemoteObject implements AdministrationServic
         if (this.getElectionsState() != ElectionsState.RUNNING){
             throw new IllegalStateException("There aren't elections running.");
         }
-        this.votes.add(vote);
+        if (!votes.containsKey(vote.getProvince())){
+            votes.put(vote.getProvince(), new ConcurrentHashMap<>());
+            votes.get(vote.getProvince()).put(vote.getTable(), Collections.synchronizedList(new LinkedList<>()));
+            tableProvinceMap.put(vote.getTable(), vote.getProvince());
+        }
+        votes.get(vote.getProvince()).get(vote.getTable()).add(vote);
         this.alertInspector(vote);
     }
 }
