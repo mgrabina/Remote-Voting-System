@@ -24,18 +24,15 @@ public class Server {
      */
     public static void main(String[] args) throws RemoteException, MalformedURLException, NotBoundException {
         logger.info("Initializing services...");
-        AdministrationService administrationService = new Servant();
-        InspectionService inspectionService = new Servant();
-        QueryService queryService = new Servant();
-        VotingService votingService = new Servant();
+        Servant servant = new Servant();
         final Registry registry = LocateRegistry.getRegistry();
-        registry.rebind("administrationService", administrationService);
+        registry.rebind("administrationService", servant);
         logger.info(" ... ");
-        registry.rebind("inspectionService", inspectionService);
+        registry.rebind("inspectionService", servant);
         logger.info(" ... ");
-        registry.rebind("queryService", queryService);
+        registry.rebind("queryService", servant);
         logger.info(" ... ");
-        registry.rebind("votingService", votingService);
+        registry.rebind("votingService", servant);
         logger.info(" DONE! ");
     }
 
