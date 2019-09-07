@@ -17,14 +17,15 @@ import java.util.Set;
 
 public class VotingServiceImpl extends UnicastRemoteObject implements VotingService {
 
-    private Set<Vote> votes;
-    private InspectionServiceImpl inspectionService;
+    private List<Vote> votes;
+    private InspectionService inspectionService;
     private AdministrationService administrationService;
-
+    
     public VotingServiceImpl() throws RemoteException, MalformedURLException, NotBoundException {
         super();
-        this.votes = new HashSet<>();
-        this.inspectionService = (InspectionServiceImpl) Naming.lookup(Constants.inspectionServiceHost + "inspectionService");
+
+        this.votes = new ArrayList<>();
+        this.inspectionService = (InspectionService) Naming.lookup(Constants.inspectionServiceHost + "inspectionService");
         this.administrationService = (AdministrationService) Naming.lookup(Constants.administrationServiceHost + "administrationService");
     }
 

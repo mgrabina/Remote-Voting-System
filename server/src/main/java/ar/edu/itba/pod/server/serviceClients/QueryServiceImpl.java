@@ -30,25 +30,58 @@ public class QueryServiceImpl extends UnicastRemoteObject implements QueryServic
 
     @Override
     public Map<String, Double> getResults(VotingDimension dimension, Optional<String> filter) throws RemoteException {
-        switch (administrationService.getElectionsState()){
+        
+    	List<Vote> votes = votingService.getVotes();
+    	
+    	switch (administrationService.getElectionsState()){
             case NON_INITIALIZED: throw new IllegalStateException("Elections didn't started yet.");
-            case RUNNING: return calculateResults(dimension, VotingSystems.FPTP, filter);
+            case RUNNING: return calculatPartialResults(votes, filter);
             case FINISHED:
                 switch (dimension){
-                    case NATIONAL: return calculateResults(dimension, VotingSystems.AV, filter);
-                    case PROVINCE: return calculateResults(dimension, VotingSystems.STV, filter);
-                    case TABLE: return calculateResults(dimension, VotingSystems.FPTP, filter);
+                    case NATIONAL: return calculateNationalResults(votes, filter);
+                    case PROVINCE: return calculateProvinceResults(votes, filter);
+                    case TABLE: return calculateTableResults(votes, filter);
                     default: throw new IllegalStateException("Invalid Dimension.");
                 }
             default: throw new IllegalStateException("Invalid Election State.");
         }
     }
-
-    private Map<String, Double> calculateResults(VotingDimension dimension, VotingSystems system, Optional<String> filter){
-        if (dimension == VotingDimension.NATIONAL && filter.isPresent()){
+    
+    
+    private Map<String, Double> calculateNationalResults(List<Vote> votes, Optional<String> filter){
+    	
+    	if (filter.isPresent()){
             throw new IllegalArgumentException("Unnecessary argument for National Voting.");
         }
+    	
+    	//HashMap<String, Double> hs = new HashSet();
+    	    	
+    	//AV
+    	return null;
+    }
+    
+    private Map<String, Double> calculateProvinceResults(List<Vote> votes, Optional<String> filter){
+    	//STV
+    	return null;
+    }
+    
+    private Map<String, Double> calculateTableResults(List<Vote> votes, Optional<String> filter){
+    	
+    	return null;
+    }
+    
+    private Map<String, Double> calculatPartialResults(List<Vote> votes, Optional<String> filter){
+    	//votes.
+    	return null;
+    }
+    
 
+    private Map<String, Double> calculateResults(VotingDimension dimension, VotingSystems system, Optional<String> filter){
+        
+    	if (dimension == VotingDimension.NATIONAL && filter.isPresent()){
+            throw new IllegalArgumentException("Unnecessary argument for National Voting.");
+        }
+    
         // Calculate results
 
         return null;
