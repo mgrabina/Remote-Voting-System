@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="VotingSystem-server" />
+        <module name="VotingSystem-client" />
+        <module name="RMIComplete-server" />
+        <module name="RMIComplete-client" />
+        <module name="RMIComplete-api" />
+        <module name="VotingSystem-api" />
+      </profile>
+    </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="RMIComplete-api" target="1.8" />
+      <module name="RMIComplete-client" target="1.8" />
+      <module name="RMIComplete-parent" target="1.8" />
+      <module name="RMIComplete-server" target="1.8" />
+      <module name="VotingSystem-api" target="1.8" />
+      <module name="VotingSystem-client" target="1.8" />
+      <module name="VotingSystem-parent" target="1.8" />
+      <module name="VotingSystem-server" target="1.8" />
+    </bytecodeTargetLevel>
+  </component>
+</project>
