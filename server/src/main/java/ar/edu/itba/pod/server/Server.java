@@ -1,9 +1,5 @@
 package ar.edu.itba.pod.server;
 
-import ar.edu.itba.pod.server.serviceClients.AdministrationServiceImpl;
-import ar.edu.itba.pod.server.serviceClients.InspectionServiceImpl;
-import ar.edu.itba.pod.server.serviceClients.QueryServiceImpl;
-import ar.edu.itba.pod.server.serviceClients.VotingServiceImpl;
 import ar.edu.itba.pod.services.AdministrationService;
 import ar.edu.itba.pod.services.InspectionService;
 import ar.edu.itba.pod.services.QueryService;
@@ -28,10 +24,10 @@ public class Server {
      */
     public static void main(String[] args) throws RemoteException, MalformedURLException, NotBoundException {
         logger.info("Initializing services...");
-        AdministrationService administrationService = new AdministrationServiceImpl();
-        InspectionService inspectionService = new InspectionServiceImpl();
-        QueryService queryService = new QueryServiceImpl();
-        VotingService votingService = new VotingServiceImpl();
+        AdministrationService administrationService = new Servant();
+        InspectionService inspectionService = new Servant();
+        QueryService queryService = new Servant();
+        VotingService votingService = new Servant();
         final Registry registry = LocateRegistry.getRegistry();
         registry.rebind("administrationService", administrationService);
         logger.info(" ... ");
