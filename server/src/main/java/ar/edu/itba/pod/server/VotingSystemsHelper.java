@@ -26,22 +26,10 @@ public class VotingSystemsHelper {
     /**
      * Returns a Map with a percentage of votes for parties using AV
      */
-    private Map<String, Double> calculateResultWithAV(List<Vote> votes, Set<String> parties){
+    private Map<String, Double> calculateResultWithAV(List<Vote> votes, Set<String> currentParties){
         int votesQuantity = votes.size();
-
         // Calculates current rankings
-        List<Map.Entry<String,Long>> ranking = votes.parallelStream().map(vote -> {
-            if (parties.contains(vote.getFirstSelection())){
-                return vote.getFirstSelection();
-            } else if (vote.getSecondSelection().isPresent() && parties.contains(vote.getSecondSelection().get())){
-                return vote.getSecondSelection().get();
-            } else if (vote.getThirdSelection().isPresent() && parties.contains(vote.getThirdSelection().get())){
-                return vote.getThirdSelection().get();
-            } else {
-                return null;
-            }
-        }).collect(Collectors.groupingBy(Function.identity(), Collectors.counting())).entrySet().stream().
-                sorted(Map.Entry.comparingByValue()).collect(Collectors.toList());
+        List<Map.Entry<String,Long>> ranking = getCurrentRanking(votes, currentParties);
         if (ranking.isEmpty()){
             return Collections.emptyMap();
         } else if ((double)ranking.get(0).getValue()/(double)votesQuantity >= MAJORITY){
@@ -51,15 +39,28 @@ public class VotingSystemsHelper {
                     .collect(Collectors.toMap(AbstractMap.Entry::getKey, AbstractMap.Entry::getValue));
         }
         // There isn't a majority -> Need to remove the last party and distribute its votes.
-        parties.remove(ranking.get(ranking.size() - 1).getKey());
-        return calculateResultWithAV(votes, parties);
+        currentParties.remove(ranking.get(ranking.size() - 1).getKey());
+        return calculateResultWithAV(votes, currentParties);
     }
 
+    private List<Map.Entry<String,Long>> getCurrentRanking(List<Vote> votes, Set<String> currentParties){
+        return votes.parallelStream().map(vote -> {
+            if (currentParties.contains(vote.getFirstSelection())){
+                return vote.getFirstSelection();
+            } else if (vote.getSecondSelection().isPresent() && currentParties.contains(vote.getSecondSelection().get())){
+                return vote.getSecondSelection().get();
+            } else if (vote.getThirdSelection().isPresent() && currentParties.contains(vote.getThirdSelection().get())){
+                return vote.getThirdSelection().get();
+            } else {
+                return null;
+            }
+        }).collect(Collectors.groupingBy(Function.identity(), Collectors.counting())).entrySet().stream().
+                sorted(Map.Entry.comparingByValue()).collect(Collectors.toList());
+    }
     /**
      * Returns a Map with a percentage of votes for parties using STV
      */
     private Map<String, Double> calculateResultWithSTV(List<Vote> votes){
-        // TODO Implement
         return null;
     }
 
@@ -67,8 +68,9 @@ public class VotingSystemsHelper {
      * Returns a Map with a percentage of votes for parties using FPTP
      */
     private Map<String, Double> calculateResultWithFPTP(List<Vote> votes){
-        // TODO Implement
-        return null;
+        List<Map.Entry<String,Long>> ranking = getCurrentRanking(votes, parties);
+        if (ranking.isEmpty()) return Collections.emptyMap();
+        return Collections.singletonMap(ranking.get(0).getKey(), (double)ranking.get(0).getValue()/(double)votes.size());
     }
 
     protected Map<String, Double> calculateNationalResults(){
