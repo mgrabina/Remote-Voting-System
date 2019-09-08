@@ -104,6 +104,9 @@ public class Servant extends UnicastRemoteObject implements AdministrationServic
             this.votingSystemsHelper.getVotes().put(vote.getProvince(), new ConcurrentHashMap<>());
             this.votingSystemsHelper.getVotes().get(vote.getProvince()).put(vote.getTable(), Collections.synchronizedList(new LinkedList<>()));
             this.votingSystemsHelper.getTableProvinceMap().put(vote.getTable(), vote.getProvince());
+            this.votingSystemsHelper.getParties().add(vote.getFirstSelection());
+            vote.getSecondSelection().ifPresent(party -> this.votingSystemsHelper.getParties().add(party));
+            vote.getThirdSelection().ifPresent(party -> this.votingSystemsHelper.getParties().add(party));
         }
         this.votingSystemsHelper.getVotes().get(vote.getProvince()).get(vote.getTable()).add(vote);
         this.alertInspector(vote);
