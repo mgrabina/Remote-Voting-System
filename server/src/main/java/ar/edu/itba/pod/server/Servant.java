@@ -19,7 +19,7 @@ public class Servant extends UnicastRemoteObject implements AdministrationServic
     private ElectionsState electionsState;
     private HashMap<String, HashMap<String, List<InspectorCallback>>> callbacks;
     private VotingSystemsHelper votingSystemsHelper;
-    private final ExecutorService threadPool = Executors.newFixedThreadPool(10);
+    private final ExecutorService threadPool = Executors.newFixedThreadPool(10); // TODO: Why not CachedPool?
 
     protected Servant() throws RemoteException {
         super();
@@ -74,8 +74,10 @@ public class Servant extends UnicastRemoteObject implements AdministrationServic
             if (callbacks.containsKey(vote.getTable())){
                 HashMap<String, List<InspectorCallback>> partyMap = callbacks.get(vote.getTable());
                 sendAlert(partyMap, vote.getFirstSelection());
-                sendAlert(partyMap, vote.getSecondSelection().get());
-                sendAlert(partyMap, vote.getThirdSelection().get());
+                if(vote.getSecondSelection().isPresent())
+                    sendAlert(partyMap, vote.getSecondSelection().get());
+                if(vote.getThirdSelection().isPresent())
+                    sendAlert(partyMap, vote.getThirdSelection().get());
             }
         }, threadPool);
     }
