@@ -1,37 +1,30 @@
 package ar.edu.itba.pod.server;
 
 import ar.edu.itba.pod.callbacks.InspectorCallback;
-import ar.edu.itba.pod.constants.Constants;
 import ar.edu.itba.pod.constants.ElectionsState;
 import ar.edu.itba.pod.constants.VotingDimension;
-import ar.edu.itba.pod.constants.VotingSystems;
-import ar.edu.itba.pod.models.Inspector;
 import ar.edu.itba.pod.models.Vote;
 import ar.edu.itba.pod.services.AdministrationService;
 import ar.edu.itba.pod.services.InspectionService;
 import ar.edu.itba.pod.services.QueryService;
 import ar.edu.itba.pod.services.VotingService;
 
-import java.rmi.Naming;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentSkipListSet;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.concurrent.*;
 
 public class Servant extends UnicastRemoteObject implements AdministrationService, VotingService, QueryService, InspectionService {
 
     private ElectionsState electionsState;
-    private HashMap<Inspector, InspectorCallback> callbaks;
+    private HashMap<String, HashMap<String, List<InspectorCallback>>> callbacks;
     private VotingSystemsHelper votingSystemsHelper;
+    private final ExecutorService threadPool = Executors.newFixedThreadPool(10);
 
     protected Servant() throws RemoteException {
         super();
         this.electionsState = ElectionsState.NON_INITIALIZED;
-        this.callbaks = new HashMap<>();
+        this.callbacks = new HashMap<>();
         this.votingSystemsHelper = new VotingSystemsHelper();
     }
 
@@ -61,22 +54,45 @@ public class Servant extends UnicastRemoteObject implements AdministrationServic
         if (this.getElectionsState() != ElectionsState.NON_INITIALIZED){
             throw new IllegalStateException("Elections already started or finished.");
         }
-        this.callbaks.put(new Inspector(table, party), callback);
+
+        if (!this.callbacks.containsKey(table)){
+            this.callbacks.put(table, new HashMap<>());
+        }
+
+        HashMap<String, List<InspectorCallback>> partyMap = this.callbacks.get(table);
+
+        if (partyMap.containsKey(party))
+            partyMap.get(party).add(callback);
+        else
+            partyMap.put(party, Arrays.asList(callback));
+
     }
 
-    private void alertInspector(Vote vote) throws RemoteException {
-        callbaks.entrySet().parallelStream()
-                .filter(e -> e.getKey().getTable().equals(vote.getTable()))
-                .filter(e -> e.getKey().getParty().equals(vote.getFirstSelection()) ||
-                        vote.getSecondSelection().map(e.getKey().getParty()::equals).orElse(Boolean.FALSE) ||
-                        vote.getThirdSelection().map(e.getKey().getParty()::equals).orElse(Boolean.FALSE)
-                ).forEach(e -> {
-            try {
-                e.getValue().inspect();
-            } catch (RemoteException ex) {
-                // LOG ERROR
+    private void alertInspector(Vote vote) throws RemoteException{
+
+        CompletableFuture.runAsync(()->{
+            if (callbacks.containsKey(vote.getTable())){
+                HashMap<String, List<InspectorCallback>> partyMap = callbacks.get(vote.getTable());
+                sendAlert(partyMap, vote.getFirstSelection());
+                sendAlert(partyMap, vote.getSecondSelection().get());
+                sendAlert(partyMap, vote.getThirdSelection().get());
             }
-        });
+        }, threadPool);
+    }
+
+    private void sendAlert(HashMap<String, List<InspectorCallback>> partyMap, String party){
+
+        if (party == null) return;
+
+        if (partyMap.containsKey(party)){
+            partyMap.get(party).forEach( c -> {
+                try {
+                    c.inspect();
+                } catch (RemoteException e) {
+                    System.out.println(e.getCause());
+                }
+            });
+        }
     }
 
     @Override
