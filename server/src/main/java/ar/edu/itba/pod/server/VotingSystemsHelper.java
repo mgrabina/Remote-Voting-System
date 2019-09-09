@@ -57,11 +57,60 @@ public class VotingSystemsHelper {
         }).collect(Collectors.groupingBy(Function.identity(), Collectors.counting())).entrySet().stream().
                 sorted(Map.Entry.comparingByValue()).collect(Collectors.toList());
     }
+
+
     /**
-     * Returns a Map with a percentage of votes for parties using STV
+     * Returns a Map with a percentage of votes for parties using AV
      */
-    private Map<String, Double> calculateResultWithSTV(List<Vote> votes){
-        return null;
+    private Map<String, Double> calculateResultWithSTV(List<Vote> votes, Set<String> currentParties){
+        int totalVotes = votes.size();
+        // Calculates current rankings
+        List<Map.Entry<String,Long>> ranking = getCurrentRanking(votes, currentParties);
+        if (ranking.isEmpty()){
+            return Collections.emptyMap();
+        }
+
+        // find first if above limit and discard last vote option for this party
+        for(Map.Entry<String, Long> rank: ranking) {
+            if (rank.getValue()>totalVotes*MAJORITY) {
+                getVotesForSelectedParty(votes,rank.getKey(), currentParties)
+                        .parallelStream().reduce((first,second)-> second).get().cancelNextOption();
+                return calculateResultWithSTV(votes, currentParties);
+            }
+        }
+
+        // if nobody above majority and have arribed at required number of winners then finish
+        if(currentParties.size()<=5)
+            return ranking.stream().map(entry ->
+                    new AbstractMap.SimpleEntry<>(entry.getKey(), (double)entry.getValue()/(double)totalVotes))
+                    .collect(Collectors.toMap(AbstractMap.Entry::getKey, AbstractMap.Entry::getValue));
+
+
+        // There isn't a majority -> Need to remove the last party and distribute its votes.
+        currentParties.remove(ranking.get(ranking.size() - 1).getKey());
+        return calculateResultWithAV(votes, currentParties);
+    }
+
+    /**
+     * Return all votes for a selectedParty that is in currentParties *in voted order*
+     * @param votes
+     * @param selectedParty
+     * @param currentParties
+     * @return
+     */
+    private List<Vote> getVotesForSelectedParty(List<Vote> votes, String selectedParty, Set<String> currentParties){
+        // TODO check if this list ALWAYS returns in the right order all items
+        return votes.parallelStream().map(vote -> {
+            if (currentParties.contains(vote.getFirstSelection()) && vote.getFirstSelection().equals(selectedParty)){
+                return vote;
+            } else if (currentParties.contains(vote.getSecondSelection()) && vote.getSecondSelection().equals(selectedParty)){
+                return vote;
+            } else if (currentParties.contains(vote.getThirdSelection()) && vote.getThirdSelection().equals(selectedParty)){
+                return vote;
+            } else {
+                return null;
+            }
+        }).collect(Collectors.toList());
     }
 
     /**
@@ -85,7 +134,7 @@ public class VotingSystemsHelper {
         }
         List<Vote> provinceVotes = this.votes.get(filter.get()).values().stream().
                 flatMap(Collection::stream).collect(Collectors.toList());
-        return calculateResultWithSTV(provinceVotes);
+        return calculateResultWithSTV(provinceVotes, new HashSet<>(parties));
     }
 
     protected Map<String, Double> calculateTableResults(Optional<String> filter){
