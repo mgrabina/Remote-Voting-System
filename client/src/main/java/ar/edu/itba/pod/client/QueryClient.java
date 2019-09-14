@@ -15,8 +15,7 @@ import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public class QueryClient {
     private static Logger logger = LoggerFactory.getLogger(QueryClient.class);
@@ -51,14 +50,8 @@ public class QueryClient {
         }
         // TODO: mandarlo a csv RESULTADOS
         if (results.getValue() == ElectionsState.FINISHED){
-            String[] winners = (String[]) results.getKey().keySet().toArray();
-            for (int i = 0 ; i < winners.length ; i++) {
-                if (i != winners.length - 1){
-                    System.out.print(winners[i] + ", ");
-                }else{
-                    System.out.print(winners[i]);
-                }
-            }
+            List<String> winners = new LinkedList(Arrays.asList(results.getKey().keySet().toArray()));
+            System.out.println(winners);
             System.out.println(" won the election");
         }
     }
