@@ -1,10 +1,12 @@
 package ar.edu.itba.pod.client;
 
 import ar.edu.itba.pod.constants.Constants;
+import ar.edu.itba.pod.constants.ElectionsState;
 import ar.edu.itba.pod.constants.VotingDimension;
 import ar.edu.itba.pod.services.AdministrationService;
 import ar.edu.itba.pod.services.InspectionService;
 import ar.edu.itba.pod.services.QueryService;
+import javafx.util.Pair;
 import org.apache.commons.cli.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +39,7 @@ public class QueryClient {
             System.out.println("Bad input. Please select state or table, not both.");
             return;
         }
-        Map<String, Double> results = null;
+        Pair<Map<String, Double>, ElectionsState> results = null;
         if(state!= null){
              results = queryService.getResults(VotingDimension.PROVINCE, Optional.of(state));
         }
@@ -45,11 +47,20 @@ public class QueryClient {
             results = queryService.getResults(VotingDimension.TABLE, Optional.of(table));
         }
         if(state == null && table == null){
-            results = queryService.getResults(VotingDimension.NATIONAL, null);
+            results = queryService.getResults(VotingDimension.NATIONAL, Optional.empty());
         }
-        // TODO: mandarlo a csv
-        results.entrySet().forEach(stringDoubleEntry -> System.out.println(stringDoubleEntry.getKey() + ": " + stringDoubleEntry.getValue()));
-
+        // TODO: mandarlo a csv RESULTADOS
+        if (results.getValue() == ElectionsState.FINISHED){
+            String[] winners = (String[]) results.getKey().keySet().toArray();
+            for (int i = 0 ; i < winners.length ; i++) {
+                if (i != winners.length - 1){
+                    System.out.print(winners[i] + ", ");
+                }else{
+                    System.out.print(winners[i]);
+                }
+            }
+            System.out.println(" won the election");
+        }
     }
 
     private static CommandLine getOptions(String[] args){

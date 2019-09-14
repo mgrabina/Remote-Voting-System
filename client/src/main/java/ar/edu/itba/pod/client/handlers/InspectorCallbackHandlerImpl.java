@@ -19,6 +19,6 @@ public class InspectorCallbackHandlerImpl extends UnicastRemoteObject implements
 
     @Override
     public void inspect() throws RemoteException{
-        System.out.println("INSPECTED for party " + this.party + " and table " + this.table);
+        System.out.println("New vote for " + this.party + " on polling place " + this.table);
     }
 }

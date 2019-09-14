@@ -8,6 +8,7 @@ import ar.edu.itba.pod.services.AdministrationService;
 import ar.edu.itba.pod.services.InspectionService;
 import ar.edu.itba.pod.services.QueryService;
 import ar.edu.itba.pod.services.VotingService;
+import javafx.util.Pair;
 
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
@@ -99,15 +100,15 @@ public class Servant extends UnicastRemoteObject implements AdministrationServic
     }
 
     @Override
-    public Map<String, Double> getResults(VotingDimension dimension, Optional<String> filter) throws RemoteException {
+    public Pair<Map<String, Double>, ElectionsState> getResults(VotingDimension dimension, Optional<String> filter) throws RemoteException {
         switch (this.getElectionsState()){
             case NON_INITIALIZED: throw new IllegalStateException("Elections didn't started yet.");
-            case RUNNING: return this.votingSystemsHelper.calculatePartialResults(dimension, filter);
+            case RUNNING: return new Pair<>(this.votingSystemsHelper.calculatePartialResults(dimension, filter), getElectionsState());
             case FINISHED:
                 switch (dimension){
-                    case NATIONAL: return this.votingSystemsHelper.calculateNationalResults();
-                    case PROVINCE: return this.votingSystemsHelper.calculateProvinceResults(filter);
-                    case TABLE: return this.votingSystemsHelper.calculateTableResults(filter);
+                    case NATIONAL: return new Pair<>(this.votingSystemsHelper.calculateNationalResults(), getElectionsState());
+                    case PROVINCE: return new Pair<>(this.votingSystemsHelper.calculateProvinceResults(filter), getElectionsState());
+                    case TABLE: return new Pair<>(this.votingSystemsHelper.calculateTableResults(filter), getElectionsState());
                     default: throw new IllegalStateException("Invalid Dimension.");
                 }
             default: throw new IllegalStateException("Invalid Election State.");
