@@ -29,7 +29,7 @@ public class VoteClient {
 
         String VOTE_FILE = cmd.getOptionValue("DvotesPath");
 
-        CSVhelper.parseData(VOTE_FILE, ((table, province, firstVote, secondVote, thirdVote) -> {
+        int voteCount = CSVhelper.parseData(VOTE_FILE, ((table, province, firstVote, secondVote, thirdVote) -> {
             votingService.vote(new Vote(
                     table,
                     province,
@@ -39,6 +39,7 @@ public class VoteClient {
             ));
         }));
 
+        System.out.println(voteCount + " votes registered");
     }
 
     private static CommandLine getOptions(String[] args){
