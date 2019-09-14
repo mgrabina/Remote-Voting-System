@@ -28,17 +28,9 @@ public class CSVhelper {
 
             String table = csvRecord.get(0);
             String province = csvRecord.get(1);
-            String firstChoice = csvRecord.get(2);
-            String secondChoice = null;
-            String thirdChoice = null;
+            String[] choices = csvRecord.get(2).split(",");
 
-            try {
-                secondChoice = csvRecord.get(3);
-                thirdChoice = csvRecord.get(4);
-            } catch (ArrayIndexOutOfBoundsException ex){
-            }
-
-            voteCreator.create(table, province, firstChoice, secondChoice, thirdChoice);
+            voteCreator.create(table, province, choices[0], choices.length == 2 ? choices[1] : null, choices.length == 3 ? choices[2] : null);
             voteCount++;
         }
 
