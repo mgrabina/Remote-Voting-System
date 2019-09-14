@@ -19,9 +19,9 @@ public class CSVhelper {
 
         try {
             Reader reader = Files.newBufferedReader(Paths.get(path));
-            csvParser = new CSVParser(reader, CSVFormat.DEFAULT);
+            csvParser = new CSVParser(reader, CSVFormat.newFormat(';'));
         } catch (IOException ex) {
-            System.out.println("Csv parser error.");
+            System.out.println("Error while parsing csv file.");
         }
 
         for (CSVRecord csvRecord : csvParser) {
@@ -29,8 +29,14 @@ public class CSVhelper {
             String table = csvRecord.get(0);
             String province = csvRecord.get(1);
             String firstChoice = csvRecord.get(2);
-            String secondChoice = csvRecord.get(3);
-            String thirdChoice = csvRecord.get(4);
+            String secondChoice = null;
+            String thirdChoice = null;
+
+            try {
+                secondChoice = csvRecord.get(3);
+                thirdChoice = csvRecord.get(4);
+            } catch (ArrayIndexOutOfBoundsException ex){
+            }
 
             voteCreator.create(table, province, firstChoice, secondChoice, thirdChoice);
             voteCount++;

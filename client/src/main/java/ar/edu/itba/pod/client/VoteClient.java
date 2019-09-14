@@ -17,7 +17,6 @@ public class VoteClient {
 
     public static void main(String[] args) throws RemoteException, MalformedURLException, NotBoundException {
 
-
         CommandLine cmd = getOptions(args);
         String ip = "//" + cmd.getOptionValue("DserverAddress") + "/votingService";
         VotingService votingService;
@@ -43,7 +42,6 @@ public class VoteClient {
     }
 
     private static CommandLine getOptions(String[] args){
-
 
         Options options = new Options();
 

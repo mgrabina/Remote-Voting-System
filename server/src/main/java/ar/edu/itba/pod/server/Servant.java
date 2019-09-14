@@ -117,6 +117,7 @@ public class Servant extends UnicastRemoteObject implements AdministrationServic
 
     @Override
     public void vote(Vote vote) throws RemoteException {
+
         if (this.getElectionsState() != ElectionsState.RUNNING){
             throw new IllegalStateException("There aren't elections running.");
         }
