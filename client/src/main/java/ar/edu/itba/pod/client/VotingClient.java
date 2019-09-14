@@ -1,5 +1,6 @@
 package ar.edu.itba.pod.client;
 
+import ar.edu.itba.pod.client.helpers.CSVhelper;
 import ar.edu.itba.pod.constants.Constants;
 import ar.edu.itba.pod.models.Vote;
 import ar.edu.itba.pod.services.VotingService;
@@ -13,18 +14,21 @@ import java.rmi.RemoteException;
 
 public class VotingClient {
     private static Logger logger = LoggerFactory.getLogger(VotingClient.class);
+    private static final String VOTE_FILE = "./votos.csv";
 
     public static void main(String[] args) throws RemoteException, MalformedURLException, NotBoundException {
         VotingService votingService = (VotingService) Naming.lookup(Constants.votingServiceHost + "votingService");
 
-        // Can Vote
-        votingService.vote(new Vote(
-                "TABLE",
-                "PROVINCE",
-                "FIRST OPTION",
-                "SECOND OPTION",
-                null
-        ));
+        CSVhelper.parseData(VOTE_FILE, ((table, province, firstVote, secondVote, thirdVote) -> {
+            votingService.vote(new Vote(
+                    table,
+                    province,
+                    firstVote,
+                    secondVote,
+                    thirdVote
+            ));
+        }));
+
     }
 
 }

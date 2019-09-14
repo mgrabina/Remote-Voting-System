@@ -4,7 +4,6 @@ import ar.edu.itba.pod.models.Vote;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
-import java.util.List;
 
 public interface VotingService extends Remote {
 

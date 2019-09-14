@@ -68,7 +68,8 @@ public class Servant extends UnicastRemoteObject implements AdministrationServic
 
     }
 
-    private void alertInspector(Vote vote) throws RemoteException{
+    @Override
+    public void alertInspector(Vote vote) throws RemoteException{
 
         CompletableFuture.runAsync(()->{
             if (callbacks.containsKey(vote.getTable())){
