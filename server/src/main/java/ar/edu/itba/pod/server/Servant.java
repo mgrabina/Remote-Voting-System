@@ -100,15 +100,15 @@ public class Servant extends UnicastRemoteObject implements AdministrationServic
     }
 
     @Override
-    public Pair<Map<String, Double>, ElectionsState> getResults(VotingDimension dimension, Optional<String> filter) throws RemoteException {
+    public Pair<Map<String, Double>, ElectionsState> getResults(VotingDimension dimension, String filter) throws RemoteException {
         switch (this.getElectionsState()){
             case NON_INITIALIZED: throw new IllegalStateException("Elections didn't started yet.");
-            case RUNNING: return new Pair<>(this.votingSystemsHelper.calculatePartialResults(dimension, filter), getElectionsState());
+            case RUNNING: return new Pair<>(this.votingSystemsHelper.calculatePartialResults(dimension, Optional.ofNullable(filter)), getElectionsState());
             case FINISHED:
                 switch (dimension){
                     case NATIONAL: return new Pair<>(this.votingSystemsHelper.calculateNationalResults(), getElectionsState());
-                    case PROVINCE: return new Pair<>(this.votingSystemsHelper.calculateProvinceResults(filter), getElectionsState());
-                    case TABLE: return new Pair<>(this.votingSystemsHelper.calculateTableResults(filter), getElectionsState());
+                    case PROVINCE: return new Pair<>(this.votingSystemsHelper.calculateProvinceResults(Optional.ofNullable(filter)), getElectionsState());
+                    case TABLE: return new Pair<>(this.votingSystemsHelper.calculateTableResults(Optional.ofNullable(filter)), getElectionsState());
                     default: throw new IllegalStateException("Invalid Dimension.");
                 }
             default: throw new IllegalStateException("Invalid Election State.");
@@ -121,20 +121,11 @@ public class Servant extends UnicastRemoteObject implements AdministrationServic
         if (this.getElectionsState() != ElectionsState.RUNNING){
             throw new IllegalStateException("There aren't elections running.");
         }
-        // if province not exists
-        if (!this.votingSystemsHelper.getVotes().containsKey(vote.getProvince())) {
-            this.votingSystemsHelper.getVotes().put(vote.getProvince(), new ConcurrentHashMap<>());
-        }
         // if table not exists
         if(!this.votingSystemsHelper.getVotes().get(vote.getProvince()).containsKey(vote.getTable())){
             this.votingSystemsHelper.getVotes().get(vote.getProvince()).put(vote.getTable(), Collections.synchronizedList(new LinkedList<>()));
             this.votingSystemsHelper.getTableProvinceMap().put(vote.getTable(), vote.getProvince());
         }
-        //TODO: remove this and add default parties
-        this.votingSystemsHelper.getParties().add(vote.getFirstSelection());
-        vote.getSecondSelection().ifPresent(party -> this.votingSystemsHelper.getParties().add(party));
-        vote.getThirdSelection().ifPresent(party -> this.votingSystemsHelper.getParties().add(party));
-
         this.votingSystemsHelper.getVotes().get(vote.getProvince()).get(vote.getTable()).add(vote);
         this.alertInspector(vote);
     }

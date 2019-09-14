@@ -35,7 +35,6 @@ public class CSVhelper {
             voteCreator.create(table, province, choices[0], choices.length == 2 ? choices[1] : null, choices.length == 3 ? choices[2] : null);
             voteCount++;
         }
-        System.out.println(voteCount + " votes registered");
         return voteCount;
     }
 

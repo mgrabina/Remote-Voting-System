@@ -41,13 +41,13 @@ public class QueryClient {
         }
         Pair<Map<String, Double>, ElectionsState> results = null;
         if(state!= null){
-             results = queryService.getResults(VotingDimension.PROVINCE, Optional.of(state));
+             results = queryService.getResults(VotingDimension.PROVINCE, state);
         }
         if(table!= null){
-            results = queryService.getResults(VotingDimension.TABLE, Optional.of(table));
+            results = queryService.getResults(VotingDimension.TABLE, table);
         }
         if(state == null && table == null){
-            results = queryService.getResults(VotingDimension.NATIONAL, Optional.empty());
+            results = queryService.getResults(VotingDimension.NATIONAL, null);
         }
         // TODO: mandarlo a csv RESULTADOS
         if (results.getValue() == ElectionsState.FINISHED){

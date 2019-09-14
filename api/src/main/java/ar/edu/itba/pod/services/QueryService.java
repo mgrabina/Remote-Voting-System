@@ -10,5 +10,5 @@ import java.util.Map;
 import java.util.Optional;
 
 public interface QueryService extends Remote {
-    Pair<Map<String, Double>, ElectionsState> getResults(VotingDimension dimension, Optional<String> filter) throws RemoteException;
+    Pair<Map<String, Double>, ElectionsState> getResults(VotingDimension dimension, String filter) throws RemoteException;
 }
