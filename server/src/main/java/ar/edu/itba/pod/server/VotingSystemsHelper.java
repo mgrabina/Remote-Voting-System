@@ -133,6 +133,15 @@ public class VotingSystemsHelper {
         return Collections.singletonMap(ranking.get(0).getKey(), (double)ranking.get(0).getValue()/(double)votes.size());
     }
 
+    /**
+     * Returns a Map with a percentage of votes for parties using FPTP
+     */
+    private Map<String, Double> calculateResultWithFPTPFullResults(List<Vote> votes){
+        return getCurrentRanking(votes, parties)
+                .stream().map(entry -> new AbstractMap.SimpleEntry<>(entry.getKey(),(double)entry.getValue()/(double)votes.size()))
+                .collect(Collectors.toMap(AbstractMap.Entry::getKey, AbstractMap.Entry::getValue));
+    }
+
     protected Map<String, Double> calculateNationalResults(){
         List<Vote> nationalVotes = this.votes.values().stream().map(Map::values).
                 flatMap(Collection::stream).flatMap(Collection::stream).collect(Collectors.toList());
@@ -162,21 +171,21 @@ public class VotingSystemsHelper {
             case NATIONAL:
                 List<Vote> nationalVotes = this.votes.values().stream().map(Map::values).
                         flatMap(Collection::stream).flatMap(Collection::stream).collect(Collectors.toList());
-                return calculateResultWithFPTP(nationalVotes);
+                return calculateResultWithFPTPFullResults(nationalVotes);
             case PROVINCE:
                 if (!filter.isPresent()){
                     throw new IllegalStateException("Filter not found.");
                 }
                 List<Vote> provinceVotes = this.votes.get(filter.get()).values().stream().
                         flatMap(Collection::stream).collect(Collectors.toList());
-                return calculateResultWithFPTP(provinceVotes);
+                return calculateResultWithFPTPFullResults(provinceVotes);
             case TABLE:
                 if (!filter.isPresent()){
                     throw new IllegalStateException("Filter not found.");
                 }
                 String province = tableProvinceMap.get(filter.get());
                 List<Vote> tableVotes = this.votes.get(province).get(filter.get());
-                return calculateResultWithFPTP(tableVotes);
+                return calculateResultWithFPTPFullResults(tableVotes);
             default: throw new IllegalStateException("Invalid Dimension.");
         }
     }
