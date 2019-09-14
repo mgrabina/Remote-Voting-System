@@ -121,14 +121,20 @@ public class Servant extends UnicastRemoteObject implements AdministrationServic
         if (this.getElectionsState() != ElectionsState.RUNNING){
             throw new IllegalStateException("There aren't elections running.");
         }
-        if (!this.votingSystemsHelper.getVotes().containsKey(vote.getProvince())){
+        // if province not exists
+        if (!this.votingSystemsHelper.getVotes().containsKey(vote.getProvince())) {
             this.votingSystemsHelper.getVotes().put(vote.getProvince(), new ConcurrentHashMap<>());
+        }
+        // if table not exists
+        if(!this.votingSystemsHelper.getVotes().get(vote.getProvince()).containsKey(vote.getTable())){
             this.votingSystemsHelper.getVotes().get(vote.getProvince()).put(vote.getTable(), Collections.synchronizedList(new LinkedList<>()));
             this.votingSystemsHelper.getTableProvinceMap().put(vote.getTable(), vote.getProvince());
-            this.votingSystemsHelper.getParties().add(vote.getFirstSelection());
-            vote.getSecondSelection().ifPresent(party -> this.votingSystemsHelper.getParties().add(party));
-            vote.getThirdSelection().ifPresent(party -> this.votingSystemsHelper.getParties().add(party));
         }
+        //TODO: remove this and add default parties
+        this.votingSystemsHelper.getParties().add(vote.getFirstSelection());
+        vote.getSecondSelection().ifPresent(party -> this.votingSystemsHelper.getParties().add(party));
+        vote.getThirdSelection().ifPresent(party -> this.votingSystemsHelper.getParties().add(party));
+
         this.votingSystemsHelper.getVotes().get(vote.getProvince()).get(vote.getTable()).add(vote);
         this.alertInspector(vote);
     }
