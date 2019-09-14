@@ -11,6 +11,7 @@ import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.rmi.RemoteException;
+import java.util.Map;
 
 public class CSVhelper {
 
@@ -39,22 +40,26 @@ public class CSVhelper {
         return voteCount;
     }
 
-    public static void writeCsv(String file, String winner) {
+    public static void writeCsv(String file, Map<String, Double> results) {
 
         CSVPrinter csvPrinter = null;
 
         try {
             BufferedWriter writer = Files.newBufferedWriter(Paths.get(file));
-            csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT);
+            csvPrinter = new CSVPrinter(writer, CSVFormat.newFormat(';')
+                    .withHeader("Porcentaje", "Partido"));
 
-            csvPrinter.printRecord(winner + " won the election");
+            for (Map.Entry<String, Double> entry : results.entrySet()) {
+                String party = entry.getKey();
+                Double result = entry.getValue();
+                csvPrinter.printRecord(result.toString(), party);
+            }
+
             csvPrinter.flush();
 
         } catch (IOException e){
             System.out.println("Error while printing csv file.");
         }
-
-
     }
 
 
