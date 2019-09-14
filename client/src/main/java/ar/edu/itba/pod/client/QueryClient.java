@@ -22,10 +22,10 @@ public class QueryClient {
     public static void main(String[] args) throws RemoteException, MalformedURLException, NotBoundException {
 
         CommandLine cmd = getOptions(args);
-        String ip = cmd.getOptionValue("DserverAddress");
+        String ip = "//" + cmd.getOptionValue("DserverAddress") + "/queryService";
         QueryService queryService;
         try {
-            queryService = (QueryService) Naming.lookup(ip + "/queryService");
+            queryService = (QueryService) Naming.lookup(ip);
         }catch (Exception e){
             System.out.println("Bad ip");
             return;

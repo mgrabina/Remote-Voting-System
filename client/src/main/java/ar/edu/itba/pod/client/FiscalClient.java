@@ -2,8 +2,6 @@ package ar.edu.itba.pod.client;
 
 import ar.edu.itba.pod.callbacks.InspectorCallback;
 import ar.edu.itba.pod.client.handlers.InspectorCallbackHandlerImpl;
-import ar.edu.itba.pod.constants.Constants;
-import ar.edu.itba.pod.services.AdministrationService;
 import ar.edu.itba.pod.services.InspectionService;
 import org.apache.commons.cli.*;
 import org.slf4j.Logger;
@@ -14,15 +12,15 @@ import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 
-public class InspectionClient {
-    private static Logger logger = LoggerFactory.getLogger(InspectionClient.class);
+public class FiscalClient {
+    private static Logger logger = LoggerFactory.getLogger(FiscalClient.class);
 
     public static void main(String[] args) throws RemoteException, MalformedURLException, NotBoundException {
         CommandLine cmd = getOptions(args);
-        String ip = cmd.getOptionValue("DserverAddress");
+        String ip = "//" + cmd.getOptionValue("DserverAddress") + "/inspectionService" ;
         InspectionService inspectionService;
         try {
-            inspectionService = (InspectionService) Naming.lookup(ip + "/inspectionService");
+            inspectionService = (InspectionService) Naming.lookup(ip);
         }catch (Exception e){
             System.out.println("Bad ip");
             return;

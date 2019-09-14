@@ -1,6 +1,5 @@
 package ar.edu.itba.pod.client;
 
-import ar.edu.itba.pod.constants.Constants;
 import ar.edu.itba.pod.services.AdministrationService;
 import org.apache.commons.cli.*;
 import org.slf4j.Logger;
@@ -11,9 +10,9 @@ import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 
-public class AdministrationClient {
+public class ManagementClient {
 
-    private static Logger logger = LoggerFactory.getLogger(AdministrationClient.class);
+    private static Logger logger = LoggerFactory.getLogger(ManagementClient.class);
     private enum ACTIONS { Open, Close, State};
 
     public static void main(String[] args) throws RemoteException, MalformedURLException, NotBoundException {
@@ -26,10 +25,10 @@ public class AdministrationClient {
             System.out.println("Bad action. Actions: Close, Open, State");
             return;
         }
-        String ip = cmd.getOptionValue("DserverAddress");
+        String ip = "//" + cmd.getOptionValue("DserverAddress") + "/administrationService";
         AdministrationService administrationService;
         try {
-            administrationService = (AdministrationService) Naming.lookup(ip + "/administrationService");
+            administrationService = (AdministrationService) Naming.lookup(ip);
         }catch (Exception e){
             System.out.println("Bad ip");
             return;
