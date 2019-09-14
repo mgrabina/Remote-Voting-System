@@ -103,9 +103,13 @@ public class VotingSystemsHelper {
         return votes.parallelStream().map(vote -> {
             if (currentParties.contains(vote.getFirstSelection()) && vote.getFirstSelection().equals(selectedParty)){
                 return vote;
-            } else if (currentParties.contains(vote.getSecondSelection()) && vote.getSecondSelection().equals(selectedParty)){
+            } else if (vote.getSecondSelection().isPresent()
+                    && currentParties.contains(vote.getSecondSelection().get())
+                    && vote.getSecondSelection().get().equals(selectedParty)){
                 return vote;
-            } else if (currentParties.contains(vote.getThirdSelection()) && vote.getThirdSelection().equals(selectedParty)){
+            } else if (vote.getThirdSelection().isPresent()
+                    && currentParties.contains(vote.getThirdSelection().get())
+                    && vote.getThirdSelection().get().equals(selectedParty)){
                 return vote;
             } else {
                 return null;
