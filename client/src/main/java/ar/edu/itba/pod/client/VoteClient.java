@@ -27,6 +27,8 @@ public class VoteClient {
             return;
         }
 
+        CSVhelper.generateRandomData();
+
         String VOTE_FILE = cmd.getOptionValue("DvotesPath");
 
         int voteCount = CSVhelper.parseData(VOTE_FILE, ((table, province, firstVote, secondVote, thirdVote) -> {

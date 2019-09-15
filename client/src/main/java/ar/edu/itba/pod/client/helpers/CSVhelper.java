@@ -12,7 +12,9 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.rmi.RemoteException;
 import java.text.DecimalFormat;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class CSVhelper {
 
@@ -66,5 +68,36 @@ public class CSVhelper {
         }
     }
 
+    public static void generateRandomData() {
+
+        CSVPrinter csvPrinter = null;
+        List<String> parties = Arrays.asList("GORILLA", "LEOPARD", "TURTLE", "OWL", "TIGER", "TARSIER", "MONKEY", "LYNX", "WHITE_TIGER", "WHITE_GORILLA");
+        List<String> provinces = Arrays.asList("JUNGLE", "SAVANNAH", "TUNDRA");
+        Random r = new Random();
+
+        try {
+            BufferedWriter writer = Files.newBufferedWriter(Paths.get("votos.csv"));
+            csvPrinter = new CSVPrinter(writer, CSVFormat.newFormat(';').withRecordSeparator('\n'));
+
+            for (int i = 1; i < r.nextInt(5000) + 1; i++) {
+                String table = String.valueOf(r.nextInt(1000) + 1000);
+                String province = provinces.get(r.nextInt(provinces.size()));
+
+                int polNumber = r.nextInt(3) + 1;
+                List<String> selectedParties = new LinkedList<>();
+                IntStream.rangeClosed(1, polNumber).forEach(j -> {
+                    selectedParties.add(parties.get(r.nextInt(parties.size())));
+                });
+                String partiesStr = selectedParties.stream().collect(Collectors.joining(","));
+
+                csvPrinter.printRecord(table, province, partiesStr);
+            }
+
+            csvPrinter.flush();
+
+        } catch (IOException e){
+            System.out.println("Error while printing csv file.");
+        }
+    }
 
 }
