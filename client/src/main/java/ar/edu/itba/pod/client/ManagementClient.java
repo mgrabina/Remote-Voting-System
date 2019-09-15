@@ -1,5 +1,7 @@
 package ar.edu.itba.pod.client;
 
+import ar.edu.itba.pod.client.helpers.CommandLineHelper;
+import ar.edu.itba.pod.exceptions.IllegalActionException;
 import ar.edu.itba.pod.services.AdministrationService;
 import org.apache.commons.cli.*;
 import org.slf4j.Logger;
@@ -13,9 +15,9 @@ import java.rmi.RemoteException;
 public class ManagementClient {
 
     private static Logger logger = LoggerFactory.getLogger(ManagementClient.class);
-    private enum ACTIONS { Open, Close, State};
+    private enum ACTIONS { Open, Close, State}
 
-    public static void main(String[] args) throws RemoteException, MalformedURLException, NotBoundException {
+    public static void main(String[] args) {
 
         CommandLine cmd = getOptions(args);
         ACTIONS a;
@@ -36,21 +38,34 @@ public class ManagementClient {
 
         switch (a){
             case Open:
-                administrationService.openElections();
-                System.out.println("Election Started");
-                return;
+                try {
+                    administrationService.openElections();
+                    System.out.println("Election Started");
+                    return;
+                } catch (RemoteException e) {
+                    System.out.println("Could not connect to server.");
+                } catch (IllegalActionException e) {
+                    System.out.println("Illegal Action: " + e.getMessage());
+                }
             case Close:
-                administrationService.closeElections();
-                System.out.println("Election closed");
-                return;
+                try {
+                    administrationService.closeElections();
+                    System.out.println("Election closed");
+                    return;
+                } catch (RemoteException e) {
+                    System.out.println("Could not connect to server.");
+                } catch (IllegalActionException e) {
+                    System.out.println("Illegal Action: " + e.getMessage());
+                }
             case State:
-                System.out.println(administrationService.getElectionsState());
-                return;
+                try {
+                    System.out.println(administrationService.getElectionsState());
+                    return;
+                } catch (RemoteException e) {
+                    System.out.println("Could not connect to server.");
+                }
             default: System.out.println("Error");
         }
-
-
-        // Can manage elections
     }
 
 
@@ -67,19 +82,7 @@ public class ManagementClient {
         action.setRequired(true);
         options.addOption(action);
 
-        CommandLineParser parser = new DefaultParser();
-        HelpFormatter formatter = new HelpFormatter();
-        CommandLine cmd=null;
-
-        try {
-            cmd = parser.parse(options, args);
-        } catch (ParseException e) {
-            System.out.println(e.getMessage());
-            formatter.printHelp("utility-name", options);
-
-            System.exit(1);
-        }
-        return cmd;
+        return CommandLineHelper.generateCommandLineParser(options, args);
     }
 
 }

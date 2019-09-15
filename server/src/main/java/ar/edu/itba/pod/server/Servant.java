@@ -3,6 +3,7 @@ package ar.edu.itba.pod.server;
 import ar.edu.itba.pod.callbacks.InspectorCallback;
 import ar.edu.itba.pod.constants.ElectionsState;
 import ar.edu.itba.pod.constants.VotingDimension;
+import ar.edu.itba.pod.exceptions.IllegalActionException;
 import ar.edu.itba.pod.models.Vote;
 import ar.edu.itba.pod.services.AdministrationService;
 import ar.edu.itba.pod.services.InspectionService;
@@ -24,7 +25,7 @@ public class Servant extends UnicastRemoteObject implements AdministrationServic
     private Object voteLock = "voteLock";
     private final ExecutorService threadPool = Executors.newCachedThreadPool();
 
-    protected Servant() throws RemoteException {
+    Servant() throws RemoteException {
         super();
         this.electionsState = ElectionsState.NON_INITIALIZED;
         this.callbacks = new HashMap<>();
@@ -34,17 +35,17 @@ public class Servant extends UnicastRemoteObject implements AdministrationServic
     ////////////////////////////////////////////////////// Management client //////////////////////////////////////////////////////////////////////////////////////
 
     @Override
-    public void openElections() throws RemoteException, IllegalStateException {
+    public void openElections() throws IllegalActionException {
         if (this.electionsState != ElectionsState.NON_INITIALIZED){
-            throw new IllegalStateException("Elections currently running or finished.");
+            throw new IllegalActionException("Elections currently running or finished.");
         }
         this.electionsState = ElectionsState.RUNNING;
     }
 
     @Override
-    public void closeElections() throws RemoteException, IllegalStateException {
+    public void closeElections() throws IllegalActionException {
         if (this.electionsState != ElectionsState.RUNNING){
-            throw new IllegalStateException("Elections not running.");
+            throw new IllegalActionException("Elections not running.");
         }
         this.electionsState = ElectionsState.FINISHED;
     }
@@ -57,10 +58,10 @@ public class Servant extends UnicastRemoteObject implements AdministrationServic
 
     //////////////////////////////////////////////////////////////// Fiscal client //////////////////////////////////////////////////////////////////////
     @Override
-    public void registerInspector(String table, String party, InspectorCallback callback) throws RemoteException, IllegalStateException {
+    public void registerInspector(String table, String party, InspectorCallback callback) throws RemoteException, IllegalActionException {
 
         if (this.getElectionsState() != ElectionsState.NON_INITIALIZED){
-            throw new IllegalStateException("Elections already started or finished.");
+            throw new IllegalActionException("Elections already started or finished.");
         }
 
         if(!votingSystemsHelper.getParties().contains(party))
@@ -105,7 +106,7 @@ public class Servant extends UnicastRemoteObject implements AdministrationServic
                 try {
                     c.inspect();
                 } catch (RemoteException e) {
-                    System.out.println(e.getCause());
+                    System.out.println(e.getMessage());
                 }
             });
         }
@@ -114,18 +115,18 @@ public class Servant extends UnicastRemoteObject implements AdministrationServic
 
     ///////////////////////////////////////////////////////////////////////// Query client/////////////////////////////////////////////////////////////////////////////
     @Override
-    public Pair<Map<String, Double>, ElectionsState> getResults(VotingDimension dimension, String filter) throws RemoteException {
+    public Pair<Map<String, Double>, ElectionsState> getResults(VotingDimension dimension, String filter) throws RemoteException, IllegalActionException {
         switch (this.getElectionsState()){
-            case NON_INITIALIZED: throw new IllegalStateException("Elections didn't started yet.");
+            case NON_INITIALIZED: throw new IllegalActionException("Elections didn't started yet.");
             case RUNNING: return new Pair<>(this.votingSystemsHelper.calculatePartialResults(dimension, Optional.ofNullable(filter)), getElectionsState());
             case FINISHED:
                 switch (dimension){
                     case NATIONAL: return new Pair<>(this.votingSystemsHelper.calculateNationalResults(), getElectionsState());
                     case PROVINCE: return new Pair<>(this.votingSystemsHelper.calculateProvinceResults(Optional.ofNullable(filter)), getElectionsState());
                     case TABLE: return new Pair<>(this.votingSystemsHelper.calculateTableResults(Optional.ofNullable(filter)), getElectionsState());
-                    default: throw new IllegalStateException("Invalid Dimension.");
+                    default: throw new IllegalActionException("Invalid Dimension.");
                 }
-            default: throw new IllegalStateException("Invalid Election State.");
+            default: throw new IllegalActionException("Invalid Election State.");
         }
     }
 
@@ -134,10 +135,10 @@ public class Servant extends UnicastRemoteObject implements AdministrationServic
     ////////////////////////////////////////////////////////////////////////// Vote client //////////////////////////////////////////////////////////////////////////
 
     @Override
-    public void vote(Vote vote) throws RemoteException {
+    public void vote(Vote vote) throws RemoteException, IllegalActionException {
 
         if (this.getElectionsState() != ElectionsState.RUNNING){
-            throw new IllegalStateException("There aren't elections running.");
+            throw new IllegalActionException("There aren't elections running.");
         }
         // if table not exists
         synchronized (voteLock) {

@@ -1,8 +1,10 @@
 package ar.edu.itba.pod.client;
 
 import ar.edu.itba.pod.client.helpers.CSVhelper;
+import ar.edu.itba.pod.client.helpers.CommandLineHelper;
 import ar.edu.itba.pod.constants.ElectionsState;
 import ar.edu.itba.pod.constants.VotingDimension;
+import ar.edu.itba.pod.exceptions.IllegalActionException;
 import ar.edu.itba.pod.services.QueryService;
 import javafx.util.Pair;
 import org.apache.commons.cli.*;
@@ -19,7 +21,7 @@ import java.util.stream.Collectors;
 public class QueryClient {
     private static Logger logger = LoggerFactory.getLogger(QueryClient.class);
 
-    public static void main(String[] args) throws RemoteException, MalformedURLException, NotBoundException {
+    public static void main(String[] args) {
 
         CommandLine cmd = getOptions(args);
         String ip = "//" + cmd.getOptionValue("DserverAddress") + "/queryService";
@@ -40,14 +42,20 @@ public class QueryClient {
 
         Pair<Map<String, Double>, ElectionsState> results = null;
 
-        if(state!= null){
-             results = queryService.getResults(VotingDimension.PROVINCE, state);
-        }
-        if(table!= null){
-            results = queryService.getResults(VotingDimension.TABLE, table);
-        }
-        if(state == null && table == null){
-            results = queryService.getResults(VotingDimension.NATIONAL, null);
+        try {
+            if (state != null) {
+                results = queryService.getResults(VotingDimension.PROVINCE, state);
+            }
+            if (table != null) {
+                results = queryService.getResults(VotingDimension.TABLE, table);
+            }
+            if (state == null && table == null) {
+                results = queryService.getResults(VotingDimension.NATIONAL, null);
+            }
+        } catch (RemoteException e){
+            System.out.println("Could not connect to server.");
+        } catch (IllegalActionException e) {
+            System.out.println("Illegal Action: " + e.getMessage());
         }
 
         if (results.getValue() == ElectionsState.FINISHED){
@@ -79,20 +87,7 @@ public class QueryClient {
         path.setRequired(true);
         options.addOption(path);
 
-
-        CommandLineParser parser = new DefaultParser();
-        HelpFormatter formatter = new HelpFormatter();
-        CommandLine cmd=null;
-
-        try {
-            cmd = parser.parse(options, args);
-        } catch (ParseException e) {
-            System.out.println(e.getMessage());
-            formatter.printHelp("utility-name", options);
-
-            System.exit(1);
-        }
-        return cmd;
+        return CommandLineHelper.generateCommandLineParser(options, args);
     }
 
 
