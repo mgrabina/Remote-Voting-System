@@ -20,11 +20,9 @@ public class Servant extends UnicastRemoteObject implements AdministrationServic
     private ElectionsState electionsState;
     private Map<String, Map<String, List<InspectorCallback>>> callbacks;
     private VotingSystemsHelper votingSystemsHelper;
-    private final ExecutorService threadPool = Executors.newFixedThreadPool(10); // TODO: Why not CachedPool?
     private Object callbackLock = "callbackLock";
     private Object voteLock = "voteLock";
-
-
+    private final ExecutorService threadPool = Executors.newCachedThreadPool();
 
     protected Servant() throws RemoteException {
         super();
