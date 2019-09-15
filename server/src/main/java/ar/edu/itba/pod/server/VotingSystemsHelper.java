@@ -1,6 +1,7 @@
 package ar.edu.itba.pod.server;
 
 import ar.edu.itba.pod.constants.VotingDimension;
+import ar.edu.itba.pod.exceptions.IllegalActionException;
 import ar.edu.itba.pod.models.Vote;
 
 import java.util.*;
@@ -157,11 +158,14 @@ public class VotingSystemsHelper {
         return calculateResultWithSTV(provinceVotes, new HashSet<>(parties));
     }
 
-    protected Map<String, Double> calculateTableResults(Optional<String> filter){
+    protected Map<String, Double> calculateTableResults(Optional<String> filter) throws IllegalActionException {
         if (!filter.isPresent()){
             throw new IllegalStateException("Filter not found.");
         }
         String province = tableProvinceMap.get(filter.get());
+        if (province == null){
+            throw new IllegalActionException("Invalid table number.");
+        }
         List<Vote> tableVotes = this.votes.get(province).get(filter.get());
         return calculateResultWithFPTP(tableVotes);
     }
