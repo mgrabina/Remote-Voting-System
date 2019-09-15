@@ -1,0 +1,16 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="QueryClient" type="Application" factoryName="Application" nameIsGenerated="true">
+    <option name="MAIN_CLASS_NAME" value="ar.edu.itba.pod.client.QueryClient" />
+    <module name="VotingSystem-client" />
+    <option name="PROGRAM_PARAMETERS" value="-DoutPath=votosTest.csv -DserverAddress=127.0.0.1:1099 -Did=1000" />
+    <extension name="coverage">
+      <pattern>
+        <option name="PATTERN" value="ar.edu.itba.pod.client.*" />
+        <option name="ENABLED" value="true" />
+      </pattern>
+    </extension>
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
