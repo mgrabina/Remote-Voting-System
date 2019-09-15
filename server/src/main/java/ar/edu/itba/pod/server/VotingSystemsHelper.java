@@ -9,18 +9,22 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class VotingSystemsHelper {
+
+    static List<String> PARTIES = Arrays.asList("GORILLA","LEOPARD","TURTLE","OWL","TIGER","TARSIER","MONKEY","LYNX", "WHITE_TIGER","WHITE_GORILLA","SNAKE","JACKALOPE","BUFFALO");
+
     private final Map<String, Map<String, List<Vote>>> votes = Collections.unmodifiableMap(new HashMap<String, Map<String, List<Vote>>>()
             {
                     {
-                        put("JUNGLE",new ConcurrentHashMap<>());
-                        put("SAVANNAH",new ConcurrentHashMap<>());
-                        put("TUNDRA",new ConcurrentHashMap<>());
+                        put("JUNGLE",new HashMap<>());
+                        put("SAVANNAH",new HashMap<>());
+                        put("TUNDRA",new HashMap<>());
                     }
             }
     );
     private Map<String, String> tableProvinceMap;
-    private final Set<String> parties = Collections.unmodifiableSet(new HashSet<>(Arrays.asList("GORILLA","LEOPARD","TURTLE","OWL","TIGER","TARSIER","MONKEY","LYNX",
-                                                                                                "WHITE_TIGER","WHITE_GORILLA","SNAKE","JACKALOPE","BUFFALO")));
+    private final Set<String> parties = Collections.unmodifiableSet(new HashSet<>(PARTIES));
+
+
     private final double MAJORITY = 0.5;
 
     public VotingSystemsHelper() {

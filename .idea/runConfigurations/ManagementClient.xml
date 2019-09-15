@@ -2,7 +2,7 @@
   <configuration default="false" name="ManagementClient" type="Application" factoryName="Application" nameIsGenerated="true">
     <option name="MAIN_CLASS_NAME" value="ar.edu.itba.pod.client.ManagementClient" />
     <module name="VotingSystem-client" />
-    <option name="PROGRAM_PARAMETERS" value="-Daction=Close -DserverAddress=127.0.0.1:1099" />
+    <option name="PROGRAM_PARAMETERS" value="-Daction=Open -DserverAddress=127.0.0.1:1099" />
     <extension name="coverage">
       <pattern>
         <option name="PATTERN" value="ar.edu.itba.pod.client.*" />

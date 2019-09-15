@@ -18,9 +18,13 @@ import java.util.concurrent.*;
 public class Servant extends UnicastRemoteObject implements AdministrationService, VotingService, QueryService, InspectionService {
 
     private ElectionsState electionsState;
-    private HashMap<String, HashMap<String, List<InspectorCallback>>> callbacks;
+    private Map<String, Map<String, List<InspectorCallback>>> callbacks;
     private VotingSystemsHelper votingSystemsHelper;
     private final ExecutorService threadPool = Executors.newFixedThreadPool(10); // TODO: Why not CachedPool?
+    private Object callbackLock = "callbackLock";
+    private Object voteLock = "voteLock";
+
+
 
     protected Servant() throws RemoteException {
         super();
@@ -28,6 +32,8 @@ public class Servant extends UnicastRemoteObject implements AdministrationServic
         this.callbacks = new HashMap<>();
         this.votingSystemsHelper = new VotingSystemsHelper();
     }
+
+    ////////////////////////////////////////////////////// Management client //////////////////////////////////////////////////////////////////////////////////////
 
     @Override
     public void openElections() throws RemoteException, IllegalStateException {
@@ -49,7 +55,9 @@ public class Servant extends UnicastRemoteObject implements AdministrationServic
     public ElectionsState getElectionsState() throws RemoteException {
         return this.electionsState;
     }
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+    //////////////////////////////////////////////////////////////// Fiscal client //////////////////////////////////////////////////////////////////////
     @Override
     public void registerInspector(String table, String party, InspectorCallback callback) throws RemoteException, IllegalStateException {
 
@@ -57,24 +65,30 @@ public class Servant extends UnicastRemoteObject implements AdministrationServic
             throw new IllegalStateException("Elections already started or finished.");
         }
 
-        if (!this.callbacks.containsKey(table)){
-            this.callbacks.put(table, new HashMap<>());
+        if(!votingSystemsHelper.getParties().contains(party))
+            throw new IllegalArgumentException("Party not registered");
+
+
+        synchronized (callbackLock) {
+            if (!this.callbacks.containsKey(table)) {
+                this.callbacks.put(table, Collections.unmodifiableMap(new HashMap<String,List<InspectorCallback>>(){
+                    {
+                        VotingSystemsHelper.PARTIES.forEach(o ->
+                            put(o, Collections.synchronizedList(new LinkedList<>())));
+                    }
+                }));
+
+            }
         }
 
-        HashMap<String, List<InspectorCallback>> partyMap = this.callbacks.get(table);
-
-        if (partyMap.containsKey(party))
-            partyMap.get(party).add(callback);
-        else
-            partyMap.put(party, Arrays.asList(callback));
-
+        this.callbacks.get(table).get(party).add(callback);
     }
 
     private void alertInspector(Vote vote) throws RemoteException{
 
         CompletableFuture.runAsync(()->{
             if (callbacks.containsKey(vote.getTable())){
-                HashMap<String, List<InspectorCallback>> partyMap = callbacks.get(vote.getTable());
+                Map <String, List<InspectorCallback>> partyMap = callbacks.get(vote.getTable());
                 sendAlert(partyMap, vote.getFirstSelection());
                 if(vote.getSecondSelection().isPresent())
                     sendAlert(partyMap, vote.getSecondSelection().get());
@@ -84,7 +98,7 @@ public class Servant extends UnicastRemoteObject implements AdministrationServic
         }, threadPool);
     }
 
-    private void sendAlert(HashMap<String, List<InspectorCallback>> partyMap, String party){
+    private void sendAlert(Map<String, List<InspectorCallback>> partyMap, String party){
 
         if (party == null) return;
 
@@ -98,7 +112,9 @@ public class Servant extends UnicastRemoteObject implements AdministrationServic
             });
         }
     }
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+    ///////////////////////////////////////////////////////////////////////// Query client/////////////////////////////////////////////////////////////////////////////
     @Override
     public Pair<Map<String, Double>, ElectionsState> getResults(VotingDimension dimension, String filter) throws RemoteException {
         switch (this.getElectionsState()){
@@ -115,6 +131,10 @@ public class Servant extends UnicastRemoteObject implements AdministrationServic
         }
     }
 
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    ////////////////////////////////////////////////////////////////////////// Vote client //////////////////////////////////////////////////////////////////////////
+
     @Override
     public void vote(Vote vote) throws RemoteException {
 
@@ -122,11 +142,14 @@ public class Servant extends UnicastRemoteObject implements AdministrationServic
             throw new IllegalStateException("There aren't elections running.");
         }
         // if table not exists
-        if(!this.votingSystemsHelper.getVotes().get(vote.getProvince()).containsKey(vote.getTable())){
-            this.votingSystemsHelper.getVotes().get(vote.getProvince()).put(vote.getTable(), Collections.synchronizedList(new LinkedList<>()));
-            this.votingSystemsHelper.getTableProvinceMap().put(vote.getTable(), vote.getProvince());
+        synchronized (voteLock) {
+            if (!this.votingSystemsHelper.getVotes().get(vote.getProvince()).containsKey(vote.getTable())) {
+                this.votingSystemsHelper.getVotes().get(vote.getProvince()).put(vote.getTable(), Collections.synchronizedList(new LinkedList<>()));
+                this.votingSystemsHelper.getTableProvinceMap().put(vote.getTable(), vote.getProvince());
+            }
         }
         this.votingSystemsHelper.getVotes().get(vote.getProvince()).get(vote.getTable()).add(vote);
         this.alertInspector(vote);
     }
 }
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
