@@ -11,6 +11,7 @@ import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.rmi.RemoteException;
+import java.text.DecimalFormat;
 import java.util.Map;
 
 public class CSVhelper {
@@ -47,12 +48,15 @@ public class CSVhelper {
         try {
             BufferedWriter writer = Files.newBufferedWriter(Paths.get(file));
             csvPrinter = new CSVPrinter(writer, CSVFormat.newFormat(';')
-                    .withHeader("Porcentaje", "Partido"));
+                    .withHeader("Porcentaje", "Partido").withRecordSeparator('\n'));
 
             for (Map.Entry<String, Double> entry : results.entrySet()) {
                 String party = entry.getKey();
-                Double result = entry.getValue();
-                csvPrinter.printRecord(result.toString(), party);
+
+                DecimalFormat format = new DecimalFormat("##.00");
+                String percent = format.format(entry.getValue() * 100) + "%";
+
+                csvPrinter.printRecord(percent, party);
             }
 
             csvPrinter.flush();

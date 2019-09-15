@@ -11,8 +11,8 @@ public class InspectorCallbackHandlerImpl extends UnicastRemoteObject implements
     private String party;
 
     public InspectorCallbackHandlerImpl(String table, String party) throws RemoteException {
-        super();
 
+        super();
         this.table = table;
         this.party = party;
     }

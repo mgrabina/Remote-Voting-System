@@ -52,6 +52,7 @@ public class Servant extends UnicastRemoteObject implements AdministrationServic
 
     @Override
     public void registerInspector(String table, String party, InspectorCallback callback) throws RemoteException, IllegalStateException {
+
         if (this.getElectionsState() != ElectionsState.NON_INITIALIZED){
             throw new IllegalStateException("Elections already started or finished.");
         }
@@ -69,8 +70,7 @@ public class Servant extends UnicastRemoteObject implements AdministrationServic
 
     }
 
-    @Override
-    public void alertInspector(Vote vote) throws RemoteException{
+    private void alertInspector(Vote vote) throws RemoteException{
 
         CompletableFuture.runAsync(()->{
             if (callbacks.containsKey(vote.getTable())){
