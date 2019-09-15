@@ -79,7 +79,7 @@ public class CSVhelper {
             BufferedWriter writer = Files.newBufferedWriter(Paths.get("votos.csv"));
             csvPrinter = new CSVPrinter(writer, CSVFormat.newFormat(';').withRecordSeparator('\n'));
 
-            for (int i = 1; i < r.nextInt(5000) + 500; i++) {
+            for (int i = 1; i < r.nextInt(1000) + 1000; i++) {
                 String table = String.valueOf(r.nextInt(1000) + 1000);
                 String province = provinces.get(r.nextInt(provinces.size()));
 
