@@ -2,6 +2,7 @@ package ar.edu.itba.pod.server;
 
 import ar.edu.itba.pod.constants.VotingDimension;
 import ar.edu.itba.pod.models.Vote;
+import com.sun.javafx.collections.MappingChange;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -10,7 +11,7 @@ import java.util.stream.Collectors;
 
 public class VotingSystemsHelper {
 
-    static List<String> PARTIES = Arrays.asList("GORILLA","LEOPARD","TURTLE","OWL","TIGER","TARSIER","MONKEY","LYNX", "WHITE_TIGER","WHITE_GORILLA","SNAKE","JACKALOPE","BUFFALO");
+    static final List<String> PARTIES = Collections.unmodifiableList(Arrays.asList("GORILLA","LEOPARD","TURTLE","OWL","TIGER","TARSIER","MONKEY","LYNX", "WHITE_TIGER","WHITE_GORILLA","SNAKE","JACKALOPE","BUFFALO"));
 
     private final Map<String, Map<String, List<Vote>>> votes = Collections.unmodifiableMap(new HashMap<String, Map<String, List<Vote>>>()
             {
@@ -65,7 +66,7 @@ public class VotingSystemsHelper {
             } else {
                 return null;
             }
-        }).collect(Collectors.groupingBy(Function.identity(), Collectors.counting())).entrySet().stream().
+        }).filter( v -> v != null).collect(Collectors.groupingBy(Function.identity(), Collectors.counting())).entrySet().stream().
                 sorted(Map.Entry.comparingByValue()).collect(Collectors.toList());
     }
 
@@ -131,16 +132,7 @@ public class VotingSystemsHelper {
     /**
      * Returns a Map with a percentage of votes for parties using FPTP
      */
-    private Map<String, Double> calculateResultWithFPTP(List<Vote> votes){
-        List<Map.Entry<String,Long>> ranking = getCurrentRanking(votes, parties);
-        if (ranking.isEmpty()) return Collections.emptyMap();
-        return Collections.singletonMap(ranking.get(0).getKey(), (double)ranking.get(0).getValue()/(double)votes.size());
-    }
-
-    /**
-     * Returns a Map with a percentage of votes for parties using FPTP
-     */
-    private Map<String, Double> calculateResultWithFPTPFullResults(List<Vote> votes){
+    private Map<String, Double> calculateResultWithFPTPResults(List<Vote> votes){
         return getCurrentRanking(votes, parties)
                 .stream().map(entry -> new AbstractMap.SimpleEntry<>(entry.getKey(),(double)entry.getValue()/(double)votes.size()))
                 .collect(Collectors.toMap(AbstractMap.Entry::getKey, AbstractMap.Entry::getValue));
@@ -167,7 +159,7 @@ public class VotingSystemsHelper {
         }
         String province = tableProvinceMap.get(filter.get());
         List<Vote> tableVotes = this.votes.get(province).get(filter.get());
-        return calculateResultWithFPTP(tableVotes);
+        return calculateResultWithFPTPResults(tableVotes);
     }
 
     protected Map<String, Double> calculatePartialResults(VotingDimension dimension, Optional<String> filter){
@@ -175,21 +167,21 @@ public class VotingSystemsHelper {
             case NATIONAL:
                 List<Vote> nationalVotes = this.votes.values().stream().map(Map::values).
                         flatMap(Collection::stream).flatMap(Collection::stream).collect(Collectors.toList());
-                return calculateResultWithFPTPFullResults(nationalVotes);
+                return calculateResultWithFPTPResults(nationalVotes);
             case PROVINCE:
                 if (!filter.isPresent()){
                     throw new IllegalStateException("Filter not found.");
                 }
                 List<Vote> provinceVotes = this.votes.get(filter.get()).values().stream().
                         flatMap(Collection::stream).collect(Collectors.toList());
-                return calculateResultWithFPTPFullResults(provinceVotes);
+                return calculateResultWithFPTPResults(provinceVotes);
             case TABLE:
                 if (!filter.isPresent()){
                     throw new IllegalStateException("Filter not found.");
                 }
                 String province = tableProvinceMap.get(filter.get());
                 List<Vote> tableVotes = this.votes.get(province).get(filter.get());
-                return calculateResultWithFPTPFullResults(tableVotes);
+                return calculateResultWithFPTPResults(tableVotes);
             default: throw new IllegalStateException("Invalid Dimension.");
         }
     }

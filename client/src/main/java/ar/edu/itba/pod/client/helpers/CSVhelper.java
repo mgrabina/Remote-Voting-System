@@ -13,6 +13,7 @@ import java.nio.file.Paths;
 import java.rmi.RemoteException;
 import java.text.DecimalFormat;
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -71,15 +72,16 @@ public class CSVhelper {
     public static void generateRandomData() {
 
         CSVPrinter csvPrinter = null;
-        List<String> parties = Arrays.asList("GORILLA", "LEOPARD", "TURTLE", "OWL", "TIGER", "TARSIER", "MONKEY", "LYNX", "WHITE_TIGER", "WHITE_GORILLA");
+        List<String> parties = Arrays.asList("GORILLA","LEOPARD","TURTLE","OWL","TIGER","TARSIER","MONKEY","LYNX",
+                "WHITE_TIGER","WHITE_GORILLA","SNAKE","JACKALOPE","BUFFALO");
         List<String> provinces = Arrays.asList("JUNGLE", "SAVANNAH", "TUNDRA");
         Random r = new Random();
 
         try {
             BufferedWriter writer = Files.newBufferedWriter(Paths.get("votos.csv"));
             csvPrinter = new CSVPrinter(writer, CSVFormat.newFormat(';').withRecordSeparator('\n'));
-
-            for (int i = 1; i < r.nextInt(1000) + 1000; i++) {
+            int randomSize = ThreadLocalRandom.current().nextInt(10000,20000);
+            for (int i = 1; i < randomSize ; i++) {
                 String table = String.valueOf(r.nextInt(1000) + 1000);
                 String province = provinces.get(r.nextInt(provinces.size()));
 
