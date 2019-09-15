@@ -2,7 +2,7 @@
 # Edit at https://www.gitignore.io/?templates=java,maven,eclipse,intellij+all
 
 **/pom.xml
-
+**/*.csv
 ### Eclipse ###
 .metadata
 bin/

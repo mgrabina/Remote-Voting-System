@@ -17,6 +17,9 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static java.util.Map.Entry.comparingByValue;
+import static java.util.stream.Collectors.toMap;
+
 public class CSVhelper {
 
     public static int parseData(String file, VoteCreator voteCreator) throws RemoteException {
@@ -46,22 +49,28 @@ public class CSVhelper {
 
     public static void writeCsv(String file, Map<String, Double> results) {
 
-        CSVPrinter csvPrinter = null;
-
         try {
             BufferedWriter writer = Files.newBufferedWriter(Paths.get(file));
-            csvPrinter = new CSVPrinter(writer, CSVFormat.newFormat(';')
+            final CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.newFormat(';')
                     .withHeader("Porcentaje", "Partido").withRecordSeparator('\n'));
 
-            for (Map.Entry<String, Double> entry : results.entrySet()) {
+            results.entrySet().stream().sorted(new Comparator<Map.Entry<String, Double>>() {
+                @Override
+                public int compare(Map.Entry<String, Double> o1, Map.Entry<String, Double> o2) {
+                    if(!o1.getValue().equals(o2.getValue()))
+                        return Double.compare(o2.getValue(),o1.getValue());
+                    return o1.getKey().compareTo(o2.getKey());
+                }
+            }).forEach(entry -> {
                 String party = entry.getKey();
-
                 DecimalFormat format = new DecimalFormat("##.00");
                 String percent = format.format(entry.getValue() * 100) + "%";
-
-                csvPrinter.printRecord(percent, party);
-            }
-
+                try {
+                    csvPrinter.printRecord(percent, party);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            });
             csvPrinter.flush();
 
         } catch (IOException e){
@@ -80,7 +89,7 @@ public class CSVhelper {
         try {
             BufferedWriter writer = Files.newBufferedWriter(Paths.get("votos.csv"));
             csvPrinter = new CSVPrinter(writer, CSVFormat.newFormat(';').withRecordSeparator('\n'));
-            int randomSize = ThreadLocalRandom.current().nextInt(10000,20000);
+            int randomSize = ThreadLocalRandom.current().nextInt(50000,100000);
             for (int i = 1; i < randomSize ; i++) {
                 String table = String.valueOf(r.nextInt(1000) + 1000);
                 String province = provinces.get(r.nextInt(provinces.size()));
