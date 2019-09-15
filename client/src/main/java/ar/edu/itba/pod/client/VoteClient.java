@@ -1,6 +1,7 @@
 package ar.edu.itba.pod.client;
 
 import ar.edu.itba.pod.client.helpers.CSVhelper;
+import ar.edu.itba.pod.client.helpers.CommandLineHelper;
 import ar.edu.itba.pod.models.Vote;
 import ar.edu.itba.pod.services.VotingService;
 import org.apache.commons.cli.*;
@@ -15,7 +16,7 @@ import java.rmi.RemoteException;
 public class VoteClient {
     private static Logger logger = LoggerFactory.getLogger(VoteClient.class);
 
-    public static void main(String[] args) throws RemoteException, MalformedURLException, NotBoundException {
+    public static void main(String[] args) {
 
         CommandLine cmd = getOptions(args);
         String ip = "//" + cmd.getOptionValue("DserverAddress") + "/votingService";
@@ -31,15 +32,20 @@ public class VoteClient {
 
         String VOTE_FILE = cmd.getOptionValue("DvotesPath");
 
-        int voteCount = CSVhelper.parseData(VOTE_FILE, ((table, province, firstVote, secondVote, thirdVote) -> {
-            votingService.vote(new Vote(
-                    table,
-                    province,
-                    firstVote,
-                    secondVote,
-                    thirdVote
-            ));
-        }));
+        int voteCount = 0;
+        try {
+            voteCount = CSVhelper.parseData(VOTE_FILE, ((table, province, firstVote, secondVote, thirdVote) -> {
+                votingService.vote(new Vote(
+                        table,
+                        province,
+                        firstVote,
+                        secondVote,
+                        thirdVote
+                ));
+            }));
+        } catch (RemoteException e) {
+            System.out.println("Could not connect to server.");
+        }
 
         System.out.println(voteCount + " votes registered");
     }
@@ -56,19 +62,7 @@ public class VoteClient {
         path.setRequired(true);
         options.addOption(path);
 
-        CommandLineParser parser = new DefaultParser();
-        HelpFormatter formatter = new HelpFormatter();
-        CommandLine cmd=null;
-
-        try {
-            cmd = parser.parse(options, args);
-        } catch (ParseException e) {
-            System.out.println(e.getMessage());
-            formatter.printHelp("utility-name", options);
-
-            System.exit(1);
-        }
-        return cmd;
+        return CommandLineHelper.generateCommandLineParser(options, args);
     }
 
 }

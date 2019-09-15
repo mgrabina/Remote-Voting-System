@@ -3,6 +3,7 @@ package ar.edu.itba.pod.server;
 import ar.edu.itba.pod.callbacks.InspectorCallback;
 import ar.edu.itba.pod.constants.ElectionsState;
 import ar.edu.itba.pod.constants.VotingDimension;
+import ar.edu.itba.pod.exceptions.IllegalActionException;
 import ar.edu.itba.pod.models.Vote;
 import ar.edu.itba.pod.services.AdministrationService;
 import ar.edu.itba.pod.services.InspectionService;
@@ -30,17 +31,17 @@ public class Servant extends UnicastRemoteObject implements AdministrationServic
     }
 
     @Override
-    public void openElections() throws RemoteException, IllegalStateException {
+    public void openElections() throws RemoteException, IllegalActionException {
         if (this.electionsState != ElectionsState.NON_INITIALIZED){
-            throw new IllegalStateException("Elections currently running or finished.");
+            throw new IllegalActionException("Elections currently running or finished.");
         }
         this.electionsState = ElectionsState.RUNNING;
     }
 
     @Override
-    public void closeElections() throws RemoteException, IllegalStateException {
+    public void closeElections() throws RemoteException, IllegalActionException {
         if (this.electionsState != ElectionsState.RUNNING){
-            throw new IllegalStateException("Elections not running.");
+            throw new IllegalActionException("Elections not running.");
         }
         this.electionsState = ElectionsState.FINISHED;
     }
