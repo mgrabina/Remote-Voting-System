@@ -145,9 +145,9 @@ public class VotingSystemsHelper {
         return calculateResultWithAV(nationalVotes, new HashSet<>(parties));
     }
 
-    protected Map<String, Double> calculateProvinceResults(Optional<String> filter){
+    protected Map<String, Double> calculateProvinceResults(Optional<String> filter) throws IllegalActionException {
         if (!filter.isPresent()){
-            throw new IllegalStateException("Filter not found.");
+            throw new IllegalActionException("Filter not found.");
         }
         List<Vote> provinceVotes = this.votes.get(filter.get()).values().stream().
                 flatMap(Collection::stream).collect(Collectors.toList());
@@ -156,7 +156,7 @@ public class VotingSystemsHelper {
 
     protected Map<String, Double> calculateTableResults(Optional<String> filter) throws IllegalActionException {
         if (!filter.isPresent()){
-            throw new IllegalStateException("Filter not found.");
+            throw new IllegalActionException("Filter not found.");
         }
         String province = tableProvinceMap.get(filter.get());
         if (province == null){
@@ -166,7 +166,7 @@ public class VotingSystemsHelper {
         return calculateResultWithFPTPResults(tableVotes);
     }
 
-    protected Map<String, Double> calculatePartialResults(VotingDimension dimension, Optional<String> filter){
+    protected Map<String, Double> calculatePartialResults(VotingDimension dimension, Optional<String> filter) throws IllegalActionException {
         switch (dimension){
             case NATIONAL:
                 List<Vote> nationalVotes = this.votes.values().stream().map(Map::values).
@@ -174,19 +174,19 @@ public class VotingSystemsHelper {
                 return calculateResultWithFPTPResults(nationalVotes);
             case PROVINCE:
                 if (!filter.isPresent()){
-                    throw new IllegalStateException("Filter not found.");
+                    throw new IllegalActionException("Filter not found.");
                 }
                 List<Vote> provinceVotes = this.votes.get(filter.get()).values().stream().
                         flatMap(Collection::stream).collect(Collectors.toList());
                 return calculateResultWithFPTPResults(provinceVotes);
             case TABLE:
                 if (!filter.isPresent()){
-                    throw new IllegalStateException("Filter not found.");
+                    throw new IllegalActionException("Filter not found.");
                 }
                 String province = tableProvinceMap.get(filter.get());
                 List<Vote> tableVotes = this.votes.get(province).get(filter.get());
                 return calculateResultWithFPTPResults(tableVotes);
-            default: throw new IllegalStateException("Invalid Dimension.");
+            default: throw new IllegalActionException("Invalid Dimension.");
         }
     }
 
