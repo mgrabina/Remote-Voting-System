@@ -3,6 +3,7 @@ package ar.edu.itba.pod.client;
 import ar.edu.itba.pod.callbacks.InspectorCallback;
 import ar.edu.itba.pod.client.handlers.InspectorCallbackHandlerImpl;
 import ar.edu.itba.pod.client.helpers.CommandLineHelper;
+import ar.edu.itba.pod.exceptions.IllegalActionException;
 import ar.edu.itba.pod.services.InspectionService;
 import org.apache.commons.cli.*;
 import org.slf4j.Logger;
@@ -38,6 +39,8 @@ public class FiscalClient {
             System.out.println("Fiscal of " + party + " registered on polling place " + table);
         } catch (RemoteException e) {
             System.out.println("Could not connect to server.");
+        } catch (IllegalActionException e) {
+            System.out.println("Illegal Action: " + e.getMessage());
         }
     }
 

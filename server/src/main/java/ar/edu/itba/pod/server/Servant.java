@@ -23,7 +23,7 @@ public class Servant extends UnicastRemoteObject implements AdministrationServic
     private VotingSystemsHelper votingSystemsHelper;
     private final ExecutorService threadPool = Executors.newCachedThreadPool();
 
-    protected Servant() throws RemoteException {
+    Servant() throws RemoteException {
         super();
         this.electionsState = ElectionsState.NON_INITIALIZED;
         this.callbacks = new HashMap<>();
@@ -31,7 +31,7 @@ public class Servant extends UnicastRemoteObject implements AdministrationServic
     }
 
     @Override
-    public void openElections() throws RemoteException, IllegalActionException {
+    public void openElections() throws IllegalActionException {
         if (this.electionsState != ElectionsState.NON_INITIALIZED){
             throw new IllegalActionException("Elections currently running or finished.");
         }
@@ -39,7 +39,7 @@ public class Servant extends UnicastRemoteObject implements AdministrationServic
     }
 
     @Override
-    public void closeElections() throws RemoteException, IllegalActionException {
+    public void closeElections() throws IllegalActionException {
         if (this.electionsState != ElectionsState.RUNNING){
             throw new IllegalActionException("Elections not running.");
         }
@@ -52,10 +52,10 @@ public class Servant extends UnicastRemoteObject implements AdministrationServic
     }
 
     @Override
-    public void registerInspector(String table, String party, InspectorCallback callback) throws RemoteException, IllegalStateException {
+    public void registerInspector(String table, String party, InspectorCallback callback) throws RemoteException, IllegalActionException {
 
         if (this.getElectionsState() != ElectionsState.NON_INITIALIZED){
-            throw new IllegalStateException("Elections already started or finished.");
+            throw new IllegalActionException("Elections already started or finished.");
         }
 
         if (!this.callbacks.containsKey(table)){
@@ -94,33 +94,33 @@ public class Servant extends UnicastRemoteObject implements AdministrationServic
                 try {
                     c.inspect();
                 } catch (RemoteException e) {
-                    System.out.println(e.getCause());
+                    System.out.println(e.getMessage());
                 }
             });
         }
     }
 
     @Override
-    public Pair<Map<String, Double>, ElectionsState> getResults(VotingDimension dimension, String filter) throws RemoteException {
+    public Pair<Map<String, Double>, ElectionsState> getResults(VotingDimension dimension, String filter) throws RemoteException, IllegalActionException {
         switch (this.getElectionsState()){
-            case NON_INITIALIZED: throw new IllegalStateException("Elections didn't started yet.");
+            case NON_INITIALIZED: throw new IllegalActionException("Elections didn't started yet.");
             case RUNNING: return new Pair<>(this.votingSystemsHelper.calculatePartialResults(dimension, Optional.ofNullable(filter)), getElectionsState());
             case FINISHED:
                 switch (dimension){
                     case NATIONAL: return new Pair<>(this.votingSystemsHelper.calculateNationalResults(), getElectionsState());
                     case PROVINCE: return new Pair<>(this.votingSystemsHelper.calculateProvinceResults(Optional.ofNullable(filter)), getElectionsState());
                     case TABLE: return new Pair<>(this.votingSystemsHelper.calculateTableResults(Optional.ofNullable(filter)), getElectionsState());
-                    default: throw new IllegalStateException("Invalid Dimension.");
+                    default: throw new IllegalActionException("Invalid Dimension.");
                 }
-            default: throw new IllegalStateException("Invalid Election State.");
+            default: throw new IllegalActionException("Invalid Election State.");
         }
     }
 
     @Override
-    public void vote(Vote vote) throws RemoteException {
+    public void vote(Vote vote) throws RemoteException, IllegalActionException {
 
         if (this.getElectionsState() != ElectionsState.RUNNING){
-            throw new IllegalStateException("There aren't elections running.");
+            throw new IllegalActionException("There aren't elections running.");
         }
         // if table not exists
         if(!this.votingSystemsHelper.getVotes().get(vote.getProvince()).containsKey(vote.getTable())){

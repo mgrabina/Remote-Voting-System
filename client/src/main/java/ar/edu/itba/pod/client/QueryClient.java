@@ -4,6 +4,7 @@ import ar.edu.itba.pod.client.helpers.CSVhelper;
 import ar.edu.itba.pod.client.helpers.CommandLineHelper;
 import ar.edu.itba.pod.constants.ElectionsState;
 import ar.edu.itba.pod.constants.VotingDimension;
+import ar.edu.itba.pod.exceptions.IllegalActionException;
 import ar.edu.itba.pod.services.QueryService;
 import javafx.util.Pair;
 import org.apache.commons.cli.*;
@@ -53,6 +54,8 @@ public class QueryClient {
             }
         } catch (RemoteException e){
             System.out.println("Could not connect to server.");
+        } catch (IllegalActionException e) {
+            System.out.println("Illegal Action: " + e.getMessage());
         }
 
         if (results.getValue() == ElectionsState.FINISHED){
