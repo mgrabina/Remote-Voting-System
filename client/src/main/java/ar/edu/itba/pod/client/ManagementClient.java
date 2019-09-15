@@ -15,7 +15,7 @@ import java.rmi.RemoteException;
 public class ManagementClient {
 
     private static Logger logger = LoggerFactory.getLogger(ManagementClient.class);
-    private enum ACTIONS { Open, Close, State};
+    private enum ACTIONS { Open, Close, State}
 
     public static void main(String[] args) {
 
