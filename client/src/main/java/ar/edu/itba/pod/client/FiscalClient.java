@@ -31,6 +31,7 @@ public class FiscalClient {
 
         InspectorCallback inspectorCallback = new InspectorCallbackHandlerImpl(table, party);
         // TODO: handlear errores de eleccion ya empezada.
+
         inspectionService.registerInspector(table, party, inspectorCallback);
         System.out.println("Fiscal of " + party + " registered on polling place " + table);
     }

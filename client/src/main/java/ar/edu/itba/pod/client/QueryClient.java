@@ -1,10 +1,8 @@
 package ar.edu.itba.pod.client;
 
-import ar.edu.itba.pod.constants.Constants;
+import ar.edu.itba.pod.client.helpers.CSVhelper;
 import ar.edu.itba.pod.constants.ElectionsState;
 import ar.edu.itba.pod.constants.VotingDimension;
-import ar.edu.itba.pod.services.AdministrationService;
-import ar.edu.itba.pod.services.InspectionService;
 import ar.edu.itba.pod.services.QueryService;
 import javafx.util.Pair;
 import org.apache.commons.cli.*;
@@ -15,7 +13,8 @@ import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
-import java.util.*;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class QueryClient {
     private static Logger logger = LoggerFactory.getLogger(QueryClient.class);
@@ -38,7 +37,9 @@ public class QueryClient {
             System.out.println("Bad input. Please select state or table, not both.");
             return;
         }
+
         Pair<Map<String, Double>, ElectionsState> results = null;
+
         if(state!= null){
              results = queryService.getResults(VotingDimension.PROVINCE, state);
         }
@@ -48,12 +49,14 @@ public class QueryClient {
         if(state == null && table == null){
             results = queryService.getResults(VotingDimension.NATIONAL, null);
         }
-        // TODO: mandarlo a csv RESULTADOS
+
         if (results.getValue() == ElectionsState.FINISHED){
-            List<String> winners = new LinkedList(Arrays.asList(results.getKey().keySet().toArray()));
-            System.out.println(winners);
-            System.out.println(" won the election");
+            String winnerString = results.getKey().keySet().stream().collect(Collectors.joining(","));
+            System.out.println(winnerString + " won the election");
         }
+
+        String outFile = cmd.getOptionValue("DoutPath");
+        CSVhelper.writeCsv(outFile, results.getKey());
     }
 
     private static CommandLine getOptions(String[] args){
