@@ -54,13 +54,10 @@ public class CSVhelper {
             final CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.newFormat(';')
                     .withHeader("Porcentaje", "Partido").withRecordSeparator('\n'));
 
-            results.entrySet().stream().sorted(new Comparator<Map.Entry<String, Double>>() {
-                @Override
-                public int compare(Map.Entry<String, Double> o1, Map.Entry<String, Double> o2) {
-                    if(!o1.getValue().equals(o2.getValue()))
-                        return Double.compare(o2.getValue(),o1.getValue());
-                    return o1.getKey().compareTo(o2.getKey());
-                }
+            results.entrySet().stream().sorted((o1, o2) -> {
+                if(!o1.getValue().equals(o2.getValue()))
+                    return Double.compare(o2.getValue(),o1.getValue());
+                return o1.getKey().compareTo(o2.getKey());
             }).forEach(entry -> {
                 String party = entry.getKey();
                 DecimalFormat format = new DecimalFormat("##.00");

@@ -46,6 +46,7 @@ public class VoteClient {
                     ));
                 } catch (IllegalActionException e) {
                     System.out.println("Illegal Action: " + e.getMessage());
+                    System.exit(1);
                 }
             }));
         } catch (RemoteException e) {

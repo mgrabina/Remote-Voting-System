@@ -12,6 +12,8 @@ import java.util.stream.Collectors;
 
 public class VotingSystemsHelper {
 
+    private final int SEATS = 5;
+
     static final List<String> PARTIES = Collections.unmodifiableList(Arrays.asList("GORILLA","LEOPARD","TURTLE","OWL","TIGER","TARSIER","MONKEY","LYNX", "WHITE_TIGER","WHITE_GORILLA","SNAKE","JACKALOPE","BUFFALO"));
 
     private final Map<String, Map<String, List<Vote>>> votes = Collections.unmodifiableMap(new HashMap<String, Map<String, List<Vote>>>()
@@ -40,16 +42,16 @@ public class VotingSystemsHelper {
      * Returns a Map with a percentage of votes for parties using AV
      */
     private Map<String, Double> calculateResultWithAV(List<Vote> votes, Set<String> currentParties){
-        int votesQuantity = votes.size();
         // Calculates current rankings
         List<Map.Entry<String,Long>> ranking = getCurrentRanking(votes, currentParties);
+        Long votesQuantity = ranking.stream().map(Map.Entry::getValue).reduce(Long::sum).orElse(0L);
+        ranking.sort(Map.Entry.comparingByValue());
         if (ranking.isEmpty()){
             return Collections.emptyMap();
-        } else if ((double)ranking.get(0).getValue()/(double)votesQuantity >= MAJORITY){
+        } else if ((double)ranking.get(ranking.size() - 1).getValue()/(double)votesQuantity >= MAJORITY){
             // There is a majority
-            return ranking.stream().map(entry ->
-                    new AbstractMap.SimpleEntry<>(entry.getKey(), (double)entry.getValue()/(double)votesQuantity))
-                    .collect(Collectors.toMap(AbstractMap.Entry::getKey, AbstractMap.Entry::getValue));
+            return Collections.singletonMap(ranking.get(ranking.size() - 1).getKey(),
+                    (double)ranking.get(ranking.size() - 1).getValue()/(double)votesQuantity);
         }
         // There isn't a majority -> Need to remove the last party and distribute its votes.
         currentParties.remove(ranking.get(ranking.size() - 1).getKey());
@@ -76,16 +78,18 @@ public class VotingSystemsHelper {
      * Returns a Map with a percentage of votes for parties using AV
      */
     private Map<String, Double> calculateResultWithSTV(List<Vote> votes, Set<String> currentParties){
-        int totalVotes = votes.size();
         // Calculates current rankings
         List<Map.Entry<String,Long>> ranking = getCurrentRanking(votes, currentParties);
+        Long votesQuantity = ranking.stream().map(Map.Entry::getValue).reduce(Long::sum).orElse(0L);
         if (ranking.isEmpty()){
             return Collections.emptyMap();
         }
 
+        Double currentMayorityRequired = Math.floor((double)votesQuantity/(SEATS + 1)) + 1;
+
         // find first if above limit and discard last vote option for this party
         for(Map.Entry<String, Long> rank: ranking) {
-            if (rank.getValue()>totalVotes*MAJORITY) {
+            if (rank.getValue()>currentMayorityRequired) {
                 getVotesForSelectedParty(votes,rank.getKey(), currentParties)
                         .parallelStream().reduce((first,second)-> second).get().cancelNextOption();
                 return calculateResultWithSTV(votes, currentParties);
@@ -95,13 +99,13 @@ public class VotingSystemsHelper {
         // if nobody above majority and have arribed at required number of winners then finish
         if(currentParties.size()<=5)
             return ranking.stream().map(entry ->
-                    new AbstractMap.SimpleEntry<>(entry.getKey(), (double)entry.getValue()/(double)totalVotes))
+                    new AbstractMap.SimpleEntry<>(entry.getKey(), (double)entry.getValue()/(double)votesQuantity))
                     .collect(Collectors.toMap(AbstractMap.Entry::getKey, AbstractMap.Entry::getValue));
 
 
         // There isn't a majority -> Need to remove the last party and distribute its votes.
         currentParties.remove(ranking.get(ranking.size() - 1).getKey());
-        return calculateResultWithAV(votes, currentParties);
+        return calculateResultWithSTV(votes, currentParties);
     }
 
     /**
