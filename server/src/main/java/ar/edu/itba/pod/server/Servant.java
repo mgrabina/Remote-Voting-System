@@ -9,7 +9,6 @@ import ar.edu.itba.pod.services.AdministrationService;
 import ar.edu.itba.pod.services.InspectionService;
 import ar.edu.itba.pod.services.QueryService;
 import ar.edu.itba.pod.services.VotingService;
-import javafx.util.Pair;
 
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
@@ -115,15 +114,15 @@ public class Servant extends UnicastRemoteObject implements AdministrationServic
 
     ///////////////////////////////////////////////////////////////////////// Query client/////////////////////////////////////////////////////////////////////////////
     @Override
-    public Pair<Map<String, Double>, ElectionsState> getResults(VotingDimension dimension, String filter) throws RemoteException, IllegalActionException {
+    public Map.Entry<Map<String, Double>, ElectionsState> getResults(VotingDimension dimension, String filter) throws RemoteException, IllegalActionException {
         switch (this.getElectionsState()){
             case NON_INITIALIZED: throw new IllegalActionException("Elections didn't started yet.");
-            case RUNNING: return new Pair<>(this.votingSystemsHelper.calculatePartialResults(dimension, Optional.ofNullable(filter)), getElectionsState());
+            case RUNNING: return new AbstractMap.SimpleEntry<>(this.votingSystemsHelper.calculatePartialResults(dimension, Optional.ofNullable(filter)), getElectionsState());
             case FINISHED:
                 switch (dimension){
-                    case NATIONAL: return new Pair<>(this.votingSystemsHelper.calculateNationalResults(), getElectionsState());
-                    case PROVINCE: return new Pair<>(this.votingSystemsHelper.calculateProvinceResults(Optional.ofNullable(filter)), getElectionsState());
-                    case TABLE: return new Pair<>(this.votingSystemsHelper.calculateTableResults(Optional.ofNullable(filter)), getElectionsState());
+                    case NATIONAL: return new AbstractMap.SimpleEntry<>(this.votingSystemsHelper.calculateNationalResults(), getElectionsState());
+                    case PROVINCE: return new AbstractMap.SimpleEntry<>(this.votingSystemsHelper.calculateProvinceResults(Optional.ofNullable(filter)), getElectionsState());
+                    case TABLE: return new AbstractMap.SimpleEntry<>(this.votingSystemsHelper.calculateTableResults(Optional.ofNullable(filter)), getElectionsState());
                     default: throw new IllegalActionException("Invalid Dimension.");
                 }
             default: throw new IllegalActionException("Invalid Election State.");

@@ -3,7 +3,6 @@ package ar.edu.itba.pod.server;
 import ar.edu.itba.pod.constants.VotingDimension;
 import ar.edu.itba.pod.exceptions.IllegalActionException;
 import ar.edu.itba.pod.models.Vote;
-import com.sun.javafx.collections.MappingChange;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -73,23 +72,22 @@ public class VotingSystemsHelper {
                 sorted(Map.Entry.comparingByValue()).collect(Collectors.toList());
     }
 
-
     /**
-     * Returns a Map with a percentage of votes for parties using AV
+     * Returns a Map with a percentage of votes for parties using STV
      */
     private Map<String, Double> calculateResultWithSTV(List<Vote> votes, Set<String> currentParties){
         // Calculates current rankings
         List<Map.Entry<String,Long>> ranking = getCurrentRanking(votes, currentParties);
-        Long votesQuantity = ranking.stream().map(Map.Entry::getValue).reduce(Long::sum).orElse(0L);
+//        Long votesQuantity = ranking.stream().map(Map.Entry::getValue).reduce(Long::sum).orElse(0L);
         if (ranking.isEmpty()){
             return Collections.emptyMap();
         }
 
-        Double currentMayorityRequired = Math.floor((double)votesQuantity/(SEATS + 1)) + 1;
+        Double mayorityRequired = Math.floor((double)votes.size()/SEATS);
 
         // find first if above limit and discard last vote option for this party
         for(Map.Entry<String, Long> rank: ranking) {
-            if (rank.getValue()>currentMayorityRequired) {
+            if (rank.getValue()>mayorityRequired) {
                 getVotesForSelectedParty(votes,rank.getKey(), currentParties)
                         .parallelStream().reduce((first,second)-> second).get().cancelNextOption();
                 return calculateResultWithSTV(votes, currentParties);
@@ -97,9 +95,9 @@ public class VotingSystemsHelper {
         }
 
         // if nobody above majority and have arribed at required number of winners then finish
-        if(currentParties.size()<=5)
+        if(currentParties.size()<=SEATS)
             return ranking.stream().map(entry ->
-                    new AbstractMap.SimpleEntry<>(entry.getKey(), (double)entry.getValue()/(double)votesQuantity))
+                    new AbstractMap.SimpleEntry<>(entry.getKey(), (double)entry.getValue()/(double)votes.size()))
                     .collect(Collectors.toMap(AbstractMap.Entry::getKey, AbstractMap.Entry::getValue));
 
 

@@ -6,7 +6,6 @@ import ar.edu.itba.pod.constants.ElectionsState;
 import ar.edu.itba.pod.constants.VotingDimension;
 import ar.edu.itba.pod.exceptions.IllegalActionException;
 import ar.edu.itba.pod.services.QueryService;
-import javafx.util.Pair;
 import org.apache.commons.cli.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +14,7 @@ import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
+import java.util.AbstractMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -40,7 +40,7 @@ public class QueryClient {
             return;
         }
 
-        Pair<Map<String, Double>, ElectionsState> results = null;
+        Map.Entry<Map<String, Double>, ElectionsState> results = null;
 
         try {
             if (state != null) {
