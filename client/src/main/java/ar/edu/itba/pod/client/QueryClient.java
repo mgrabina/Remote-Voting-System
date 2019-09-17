@@ -54,17 +54,21 @@ public class QueryClient {
             }
         } catch (RemoteException e){
             System.out.println("Could not connect to server.");
+            System.exit(1);
         } catch (IllegalActionException e) {
             System.out.println("Illegal Action: " + e.getMessage());
+            System.exit(1);
         }
 
-        if (results.getValue() == ElectionsState.FINISHED){
+        if (results.getValue() == ElectionsState.FINISHED && table == null){
             String winnerString = results.getKey().keySet().stream().collect(Collectors.joining(","));
             System.out.println(winnerString + " won the election");
         }
 
-        String outFile = cmd.getOptionValue("DoutPath");
-        CSVhelper.writeCsv(outFile, results.getKey());
+        if (!results.getKey().isEmpty()){
+            String outFile = cmd.getOptionValue("DoutPath");
+            CSVhelper.writeCsv(outFile, results.getKey());
+        }
     }
 
     private static CommandLine getOptions(String[] args){

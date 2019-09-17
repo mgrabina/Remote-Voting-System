@@ -186,7 +186,12 @@ public class VotingSystemsHelper {
                     throw new IllegalActionException("Filter not found.");
                 }
                 String province = tableProvinceMap.get(filter.get());
-                List<Vote> tableVotes = this.votes.get(province).get(filter.get());
+                List<Vote> tableVotes;
+                if (province == null){
+                    tableVotes = Collections.emptyList();
+                } else {
+                    tableVotes = this.votes.get(province).get(filter.get());
+                }
                 return calculateResultWithFPTPResults(tableVotes);
             default: throw new IllegalActionException("Invalid Dimension.");
         }
