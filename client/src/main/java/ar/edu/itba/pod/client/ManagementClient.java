@@ -47,6 +47,7 @@ public class ManagementClient {
                 } catch (IllegalActionException e) {
                     System.out.println("Illegal Action: " + e.getMessage());
                 }
+                break;
             case Close:
                 try {
                     administrationService.closeElections();
@@ -57,6 +58,7 @@ public class ManagementClient {
                 } catch (IllegalActionException e) {
                     System.out.println("Illegal Action: " + e.getMessage());
                 }
+                break;
             case State:
                 try {
                     System.out.println(administrationService.getElectionsState());
@@ -64,6 +66,7 @@ public class ManagementClient {
                 } catch (RemoteException e) {
                     System.out.println("Could not connect to server.");
                 }
+                break;
             default: System.out.println("Error");
         }
     }
