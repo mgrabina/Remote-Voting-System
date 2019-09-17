@@ -83,7 +83,7 @@ public class VotingSystemsHelper {
             return Collections.emptyMap();
         }
 
-        Double mayorityRequired = Math.floor((double)votes.size()/SEATS);
+        Double mayorityRequired = Math.floor((double)votes.size()/(SEATS + 1)) + 1;
 
         // find first if above limit and discard last vote option for this party
         for(Map.Entry<String, Long> rank: ranking) {
