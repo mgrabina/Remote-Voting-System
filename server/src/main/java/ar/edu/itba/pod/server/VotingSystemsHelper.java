@@ -123,28 +123,28 @@ public class VotingSystemsHelper {
             return winners;
 
         List<Map.Entry<String,Long>> ranking = getCurrentRanking(votes, currentParties);
-
+        List<Map.Entry<String,Long>> realRanking =  new LinkedList<>(ranking);
         transferable.forEach( (party, transfer) -> {
             if(currentParties.contains(party)){
                 boolean exists = false;
-                for (Map.Entry<String, Long> entry: ranking){
+                for (Map.Entry<String, Long> entry: realRanking){
                     if(entry.getKey().equals(party)){
                         entry.setValue(transfer.getValue().longValue() + entry.getValue());
                         exists = true;
                     }
                 }
                 if(!exists)
-                    ranking.add(new AbstractMap.SimpleEntry<>(party,transfer.getValue().longValue()));
+                    realRanking.add(new AbstractMap.SimpleEntry<>(party,transfer.getValue().longValue()));
             }
         });
 
-        if (ranking.isEmpty()){
+        if (realRanking.isEmpty()){
             return Collections.emptyMap();
         }
 
-        Collections.sort(ranking,Map.Entry.comparingByValue());
+        Collections.sort(realRanking,Map.Entry.comparingByValue());
 
-        Map.Entry<String,Long> rank = ranking.get(ranking.size() - 1);
+        Map.Entry<String,Long> rank = realRanking.get(realRanking.size() - 1);
 
         if (rank.getValue()>=mayorityRequired) {
                 List<Vote> auxTotalVotes = new LinkedList<>();
@@ -153,7 +153,14 @@ public class VotingSystemsHelper {
                     auxTotalVotes.addAll(transferable.get(rank.getKey()).getKey());
                 Map<String, List<Vote>> currentVotes = getDistribution(auxTotalVotes,rank.getKey(),currentParties);
                 currentVotes.entrySet().forEach( stringListEntry -> {
-                    double quota = (new Double(stringListEntry.getValue().size()) / rank.getValue()) * (rank.getValue().doubleValue() - mayorityRequired);
+                    double realQuote = 0;
+                    for (Map.Entry<String,Long> entry: ranking){
+                        if(entry.getKey().equals(rank.getKey()))
+                            realQuote = entry.getValue();
+                    }
+                    if(transferable.containsKey(rank.getKey()))
+                        realQuote += transferable.get(rank.getKey()).getKey().size();
+                    double quota = (new Double(stringListEntry.getValue().size()) / realQuote) * (rank.getValue().doubleValue() - mayorityRequired);
                     votes.removeAll(stringListEntry.getValue());
                     if(transferable.containsKey(stringListEntry.getKey())){
                         transferable.get(stringListEntry.getKey()).getKey().addAll(stringListEntry.getValue());
@@ -167,12 +174,13 @@ public class VotingSystemsHelper {
             return calculateResultWithSTV(votes, currentParties, winners, transferable, mayorityRequired, total);
         }
 
-        if(winners.size() + ranking.size() == SEATS) {
-            ranking.forEach(p -> winners.put(p.getKey(), p.getValue().doubleValue()/total));
+        //esta mal hay que agarrar los de party
+        if(winners.size() + realRanking.size() == SEATS) {
+            realRanking.forEach(p -> winners.put(p.getKey(), p.getValue().doubleValue()/total));
             return winners;
         }
 
-        currentParties.remove(ranking.get(0).getKey());
+        currentParties.remove(realRanking.get(0).getKey());
         return calculateResultWithSTV(votes, currentParties, winners, transferable, mayorityRequired, total);
     }
 
