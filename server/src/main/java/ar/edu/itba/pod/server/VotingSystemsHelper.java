@@ -129,7 +129,7 @@ public class VotingSystemsHelper {
                 boolean exists = false;
                 for (Map.Entry<String, Long> entry: ranking){
                     if(entry.getKey().equals(party)){
-                        entry.setValue(transfer.getValue().longValue());
+                        entry.setValue(transfer.getValue().longValue() + entry.getValue());
                         exists = true;
                     }
                 }
