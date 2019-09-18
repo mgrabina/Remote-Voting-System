@@ -41,10 +41,9 @@ public class VotingSystemsHelper {
      * Returns a Map with a percentage of votes for parties using AV
      */
     private Map<String, Double> calculateResultWithAV(List<Vote> votes, Set<String> currentParties){
-        // Calculates current rankings
+        // Calculates current rankings ordered by votes ascending
         List<Map.Entry<String,Long>> ranking = getCurrentRanking(votes, currentParties);
         Long votesQuantity = ranking.stream().map(Map.Entry::getValue).reduce(Long::sum).orElse(0L);
-        ranking.sort(Map.Entry.comparingByValue());
         if (ranking.isEmpty()){
             return Collections.emptyMap();
         } else if ((double)ranking.get(ranking.size() - 1).getValue()/(double)votesQuantity >= MAJORITY){
@@ -52,8 +51,15 @@ public class VotingSystemsHelper {
             return Collections.singletonMap(ranking.get(ranking.size() - 1).getKey(),
                     (double)ranking.get(ranking.size() - 1).getValue()/(double)votesQuantity);
         }
-        // There isn't a majority -> Need to remove the last party and distribute its votes.
-        currentParties.remove(ranking.get(ranking.size() - 1).getKey());
+        // There isn't a majority -> Need to remove the parties with the least quantity of votes.
+        Long minimumVotesQuantity = ranking.stream().map(Map.Entry::getValue).reduce(Math::min).orElse(ranking.get(0).getValue());
+        for (Map.Entry<String, Long> current : ranking){
+            if (current.getValue().equals(minimumVotesQuantity)){
+                currentParties.remove(current.getKey());
+            } else {
+                break;
+            }
+        }
         return calculateResultWithAV(votes, currentParties);
     }
 
