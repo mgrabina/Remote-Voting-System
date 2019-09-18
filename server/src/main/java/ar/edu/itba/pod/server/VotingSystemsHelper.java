@@ -138,19 +138,12 @@ public class VotingSystemsHelper {
             }
         });
 
-        // if nobody above majority and have arribed at required number of winners then finish
-        if(winners.size() + ranking.size() == SEATS) {
-            ranking.forEach(p -> winners.put(p.getKey(), p.getValue().doubleValue()/total));
-            return winners;
-        }
-
         if (ranking.isEmpty()){
             return Collections.emptyMap();
         }
 
         Collections.sort(ranking,Map.Entry.comparingByValue());
 
-        // find first if above limit and discard last vote option for this party
         Map.Entry<String,Long> rank = ranking.get(ranking.size() - 1);
 
         if (rank.getValue()>=mayorityRequired) {
@@ -174,7 +167,11 @@ public class VotingSystemsHelper {
             return calculateResultWithSTV(votes, currentParties, winners, transferable, mayorityRequired, total);
         }
 
-        // There isn't a majority -> Need to remove the last party and distribute its votes.
+        if(winners.size() + ranking.size() == SEATS) {
+            ranking.forEach(p -> winners.put(p.getKey(), p.getValue().doubleValue()/total));
+            return winners;
+        }
+
         currentParties.remove(ranking.get(0).getKey());
         return calculateResultWithSTV(votes, currentParties, winners, transferable, mayorityRequired, total);
     }
