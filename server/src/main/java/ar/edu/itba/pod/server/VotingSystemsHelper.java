@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 
 public class VotingSystemsHelper {
 
-    private final int SEATS = 3;
+    private final int SEATS = 5;
 
     static final List<String> PARTIES = Collections.unmodifiableList(Arrays.asList("GORILLA","LEOPARD","TURTLE","OWL","TIGER","TARSIER","MONKEY","LYNX", "WHITE_TIGER","WHITE_GORILLA","SNAKE","JACKALOPE","BUFFALO"));
 
@@ -123,18 +123,20 @@ public class VotingSystemsHelper {
             return winners;
 
         List<Map.Entry<String,Long>> ranking = getCurrentRanking(votes, currentParties);
-        List<Map.Entry<String,Long>> realRanking =  new LinkedList<>(ranking);
+        List<Map.Entry<String,Double>> realRanking =  ranking.parallelStream().
+                map(entry -> new AbstractMap.SimpleEntry<>(entry.getKey(), new Double(entry.getValue()))).
+                collect(Collectors.toList());
         transferable.forEach( (party, transfer) -> {
             if(currentParties.contains(party)){
                 boolean exists = false;
-                for (Map.Entry<String, Long> entry: realRanking){
+                for (Map.Entry<String, Double> entry: realRanking){
                     if(entry.getKey().equals(party)){
                         entry.setValue(transfer.getValue().longValue() + entry.getValue());
                         exists = true;
                     }
                 }
                 if(!exists)
-                    realRanking.add(new AbstractMap.SimpleEntry<>(party,transfer.getValue().longValue()));
+                    realRanking.add(new AbstractMap.SimpleEntry<>(party,transfer.getValue()));
             }
         });
 
@@ -144,7 +146,7 @@ public class VotingSystemsHelper {
 
         Collections.sort(realRanking,Map.Entry.comparingByValue());
 
-        Map.Entry<String,Long> rank = realRanking.get(realRanking.size() - 1);
+        Map.Entry<String,Double> rank = realRanking.get(realRanking.size() - 1);
 
         if (rank.getValue()>=mayorityRequired) {
                 List<Vote> auxTotalVotes = new LinkedList<>();
@@ -181,6 +183,29 @@ public class VotingSystemsHelper {
         }
 
         currentParties.remove(realRanking.get(0).getKey());
+        if (transferable.containsKey(realRanking.get(0).getKey())){
+            transferable.get(realRanking.get(0).getKey()).getKey().forEach(vote -> {
+                String party;
+                if (vote.getFirstSelection().equals(realRanking.get(0).getKey()) && vote.getSecondSelection().isPresent()){
+                    party = vote.getSecondSelection().get();
+                } else if (vote.getSecondSelection().isPresent() && vote.getSecondSelection().get().equals(realRanking.get(0).getKey()) && vote.getThirdSelection().isPresent()){
+                    party = vote.getThirdSelection().get();
+                } else {
+                    return;
+                }
+                if (transferable.containsKey(party)){
+                    transferable.get(party).getKey().add(vote);
+                    transferable.get(party).setValue(
+                            transferable.get(party).getValue() +
+                                    transferable.get(realRanking.get(0).getKey()).getValue() / transferable.get(realRanking.get(0).getKey()).getKey().size()
+                    );
+                } else if (vote.getSecondSelection().isPresent()){
+                    transferable.put(party, new AbstractMap.SimpleEntry<>(
+                            Collections.singletonList(vote), transferable.get(realRanking.get(0).getKey()).getValue() / transferable.get(realRanking.get(0).getKey()).getKey().size() ));
+                }
+            });
+            transferable.remove(realRanking.get(0).getKey());
+        }
         return calculateResultWithSTV(votes, currentParties, winners, transferable, mayorityRequired, total);
     }
 
