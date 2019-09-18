@@ -86,7 +86,7 @@ public class CSVhelper {
         try {
             BufferedWriter writer = Files.newBufferedWriter(Paths.get("votos.csv"));
             csvPrinter = new CSVPrinter(writer, CSVFormat.newFormat(';').withRecordSeparator('\n'));
-            int randomSize = ThreadLocalRandom.current().nextInt(10,10);
+            int randomSize = ThreadLocalRandom.current().nextInt(5000,10000);
             for (int i = 1; i < randomSize ; i++) {
                 String table = String.valueOf(r.nextInt(1000) + 1000);
                 String province = provinces.get(r.nextInt(provinces.size()));

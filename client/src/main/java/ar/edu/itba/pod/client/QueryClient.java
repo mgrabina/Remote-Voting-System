@@ -60,7 +60,7 @@ public class QueryClient {
             System.exit(1);
         }
 
-        if (results.getValue() == ElectionsState.FINISHED && table == null){
+        if (results.getValue() == ElectionsState.FINISHED && table == null && !results.getKey().isEmpty()){
             String winnerString = results.getKey().keySet().stream().collect(Collectors.joining(","));
             System.out.println(winnerString + " won the election");
         }
