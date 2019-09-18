@@ -74,8 +74,44 @@ public class VotingSystemsHelper {
             } else {
                 return null;
             }
-        }).filter( v -> v != null).collect(Collectors.groupingBy(Function.identity(), Collectors.counting())).entrySet().stream().
+        }).filter(Objects::nonNull).collect(Collectors.groupingBy(Function.identity(), Collectors.counting())).entrySet().stream().
                 sorted(Map.Entry.comparingByValue()).collect(Collectors.toList());
+    }
+
+
+    private Map<String, List<Vote>> getDistribution(List<Vote> votes, String partyToDistribute, Set<String> availableParties){
+        Map<String, List<Vote>> auxVotes = votes.parallelStream()
+                .map(vote -> {
+                    if (availableParties.contains(vote.getFirstSelection())){
+                        return new AbstractMap.SimpleEntry<>(vote.getFirstSelection(), vote);
+                    } else if (vote.getSecondSelection().isPresent() && availableParties.contains(vote.getSecondSelection().get())){
+                        return new AbstractMap.SimpleEntry<>(vote.getSecondSelection().get(), vote);
+                    } else if (vote.getThirdSelection().isPresent() && availableParties.contains(vote.getThirdSelection().get())){
+                        return new AbstractMap.SimpleEntry<>(vote.getThirdSelection().get(), vote);
+                    } else {
+                        return null;
+                    }
+                })
+                .filter(Objects::nonNull)
+                .collect(Collectors.groupingBy(AbstractMap.SimpleEntry::getKey,
+                        Collectors.mapping(AbstractMap.SimpleEntry::getValue, Collectors.toList())));
+        HashSet<String> auxAvailableParties = new HashSet<>(availableParties);
+        auxAvailableParties.remove(partyToDistribute);
+        return auxVotes.get(partyToDistribute).parallelStream()
+                .map(vote -> {
+                    if (auxAvailableParties.contains(vote.getFirstSelection())){
+                        return new AbstractMap.SimpleEntry<>(vote.getFirstSelection(), vote);
+                    } else if (vote.getSecondSelection().isPresent() && auxAvailableParties.contains(vote.getSecondSelection().get())){
+                        return new AbstractMap.SimpleEntry<>(vote.getSecondSelection().get(), vote);
+                    } else if (vote.getThirdSelection().isPresent() && auxAvailableParties.contains(vote.getThirdSelection().get())){
+                        return new AbstractMap.SimpleEntry<>(vote.getThirdSelection().get(), vote);
+                    } else {
+                        return null;
+                    }
+                })
+                .filter(Objects::nonNull)
+                .collect(Collectors.groupingBy(AbstractMap.SimpleEntry::getKey,
+                        Collectors.mapping(AbstractMap.SimpleEntry::getValue, Collectors.toList())));
     }
 
     /**
