@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 
 public class VotingSystemsHelper {
 
-    private final int SEATS = 5;
+    private final int SEATS = 3;
 
     static final List<String> PARTIES = Collections.unmodifiableList(Arrays.asList("GORILLA","LEOPARD","TURTLE","OWL","TIGER","TARSIER","MONKEY","LYNX", "WHITE_TIGER","WHITE_GORILLA","SNAKE","JACKALOPE","BUFFALO"));
 
@@ -117,61 +117,66 @@ public class VotingSystemsHelper {
     /**
      * Returns a Map with a percentage of votes for parties using STV
      */
-    private Map<String, Double> calculateResultWithSTV(List<Vote> votes, Set<String> currentParties){
-        // Calculates current rankings
+    private Map<String, Double> calculateResultWithSTV(List<Vote> votes, Set<String> currentParties, Map<String,Double> winners, Map<String,Map.Entry<List<Vote>,Double>> transferable, double mayorityRequired, long total){
+
+        if(winners.size() == SEATS)
+            return winners;
+
         List<Map.Entry<String,Long>> ranking = getCurrentRanking(votes, currentParties);
-//        Long votesQuantity = ranking.stream().map(Map.Entry::getValue).reduce(Long::sum).orElse(0L);
+
+        transferable.forEach( (party, transfer) -> {
+            if(currentParties.contains(party)){
+                boolean exists = false;
+                for (Map.Entry<String, Long> entry: ranking){
+                    if(entry.getKey().equals(party)){
+                        entry.setValue(transfer.getValue().longValue());
+                        exists = true;
+                    }
+                }
+                if(!exists)
+                    ranking.add(new AbstractMap.SimpleEntry<>(party,transfer.getValue().longValue()));
+            }
+        });
+
+        // if nobody above majority and have arribed at required number of winners then finish
+        if(winners.size() + ranking.size() == SEATS) {
+            ranking.forEach(p -> winners.put(p.getKey(), p.getValue().doubleValue()/total));
+            return winners;
+        }
+
         if (ranking.isEmpty()){
             return Collections.emptyMap();
         }
 
-        Double mayorityRequired = Math.floor((double)votes.size()/(SEATS + 1)) + 1;
+        Collections.sort(ranking,Map.Entry.comparingByValue());
 
         // find first if above limit and discard last vote option for this party
-        for(Map.Entry<String, Long> rank: ranking) {
-            if (rank.getValue()>mayorityRequired) {
-                getVotesForSelectedParty(votes,rank.getKey(), currentParties)
-                        .parallelStream().reduce((first,second)-> second).get().cancelNextOption();
-                return calculateResultWithSTV(votes, currentParties);
-            }
+        Map.Entry<String,Long> rank = ranking.get(ranking.size() - 1);
+
+        if (rank.getValue()>=mayorityRequired) {
+                List<Vote> auxTotalVotes = new LinkedList<>();
+                auxTotalVotes.addAll(votes);
+                if(transferable.containsKey(rank.getKey()))
+                    auxTotalVotes.addAll(transferable.get(rank.getKey()).getKey());
+                Map<String, List<Vote>> currentVotes = getDistribution(auxTotalVotes,rank.getKey(),currentParties);
+                currentVotes.entrySet().forEach( stringListEntry -> {
+                    double quota = (new Double(stringListEntry.getValue().size()) / rank.getValue()) * (rank.getValue().doubleValue() - mayorityRequired);
+                    votes.removeAll(stringListEntry.getValue());
+                    if(transferable.containsKey(stringListEntry.getKey())){
+                        transferable.get(stringListEntry.getKey()).getKey().addAll(stringListEntry.getValue());
+                        transferable.get(stringListEntry.getKey()).setValue(transferable.get(stringListEntry.getKey()).getValue() + quota);
+                    }else {
+                        transferable.put(stringListEntry.getKey(),new AbstractMap.SimpleEntry<>(stringListEntry.getValue(),quota));
+                    }
+            });
+            currentParties.remove(rank.getKey());
+            winners.put(rank.getKey(), mayorityRequired/total);
+            return calculateResultWithSTV(votes, currentParties, winners, transferable, mayorityRequired, total);
         }
 
-        // if nobody above majority and have arribed at required number of winners then finish
-        if(currentParties.size()<=SEATS)
-            return ranking.stream().map(entry ->
-                    new AbstractMap.SimpleEntry<>(entry.getKey(), (double)entry.getValue()/(double)votes.size()))
-                    .collect(Collectors.toMap(AbstractMap.Entry::getKey, AbstractMap.Entry::getValue));
-
-
         // There isn't a majority -> Need to remove the last party and distribute its votes.
-        currentParties.remove(ranking.get(ranking.size() - 1).getKey());
-        return calculateResultWithSTV(votes, currentParties);
-    }
-
-    /**
-     * Return all votes for a selectedParty that is in currentParties *in voted order*
-     * @param votes
-     * @param selectedParty
-     * @param currentParties
-     * @return
-     */
-    private List<Vote> getVotesForSelectedParty(List<Vote> votes, String selectedParty, Set<String> currentParties){
-        // TODO check if this list ALWAYS returns in the right order all items
-        return votes.parallelStream().map(vote -> {
-            if (currentParties.contains(vote.getFirstSelection()) && vote.getFirstSelection().equals(selectedParty)){
-                return vote;
-            } else if (vote.getSecondSelection().isPresent()
-                    && currentParties.contains(vote.getSecondSelection().get())
-                    && vote.getSecondSelection().get().equals(selectedParty)){
-                return vote;
-            } else if (vote.getThirdSelection().isPresent()
-                    && currentParties.contains(vote.getThirdSelection().get())
-                    && vote.getThirdSelection().get().equals(selectedParty)){
-                return vote;
-            } else {
-                return null;
-            }
-        }).filter(Objects::nonNull).collect(Collectors.toList());
+        currentParties.remove(ranking.get(0).getKey());
+        return calculateResultWithSTV(votes, currentParties, winners, transferable, mayorityRequired, total);
     }
 
     /**
@@ -195,7 +200,8 @@ public class VotingSystemsHelper {
         }
         List<Vote> provinceVotes = this.votes.get(filter.get()).values().stream().
                 flatMap(Collection::stream).collect(Collectors.toList());
-        return calculateResultWithSTV(provinceVotes, new HashSet<>(parties));
+        Double mayorityRequired = Math.floor((double)provinceVotes.size()/(SEATS + 1)) + 1;
+        return calculateResultWithSTV(provinceVotes, new HashSet<>(parties), new HashMap<>(), new HashMap<>(), mayorityRequired, provinceVotes.size());
     }
 
     protected Map<String, Double> calculateTableResults(Optional<String> filter) throws IllegalActionException {

@@ -29,7 +29,7 @@ public class VoteClient {
             return;
         }
 
-//        CSVhelper.generateRandomData();
+        //CSVhelper.generateRandomData();
 
         String VOTE_FILE = cmd.getOptionValue("DvotesPath");
 

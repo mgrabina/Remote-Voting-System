@@ -40,7 +40,7 @@ public class CSVhelper {
             String province = csvRecord.get(1);
             String[] choices = csvRecord.get(2).split(",");
 
-            voteCreator.create(table, province, choices[0], choices.length == 2 ? choices[1] : null, choices.length == 3 ? choices[2] : null);
+            voteCreator.create(table, province, choices[0], choices.length >= 2 ? choices[1] : null, choices.length == 3 ? choices[2] : null);
             voteCount++;
         }
 
@@ -80,13 +80,13 @@ public class CSVhelper {
         CSVPrinter csvPrinter = null;
         List<String> parties = Arrays.asList("GORILLA","LEOPARD","TURTLE","OWL","TIGER","TARSIER","MONKEY","LYNX",
                 "WHITE_TIGER","WHITE_GORILLA","SNAKE","JACKALOPE","BUFFALO");
-        List<String> provinces = Arrays.asList("JUNGLE", "SAVANNAH", "TUNDRA");
+        List<String> provinces = Arrays.asList("JUNGLE");
         Random r = new Random();
 
         try {
             BufferedWriter writer = Files.newBufferedWriter(Paths.get("votos.csv"));
             csvPrinter = new CSVPrinter(writer, CSVFormat.newFormat(';').withRecordSeparator('\n'));
-            int randomSize = ThreadLocalRandom.current().nextInt(50000,100000);
+            int randomSize = ThreadLocalRandom.current().nextInt(5000,10000);
             for (int i = 1; i < randomSize ; i++) {
                 String table = String.valueOf(r.nextInt(1000) + 1000);
                 String province = provinces.get(r.nextInt(provinces.size()));

@@ -21,16 +21,6 @@ public class Vote implements Serializable {
         this.thirdSelection = thirdSelection;
     }
 
-    public void cancelNextOption() {
-        if (firstSelection != null){
-            firstSelection = null;
-        } else if (secondSelection != null){
-            secondSelection = null;
-        } else if (thirdSelection != null){
-            thirdSelection = null;
-        }
-    }
-
     public String getTable() {
         return table;
     }
@@ -50,4 +40,6 @@ public class Vote implements Serializable {
     public Optional<String> getThirdSelection() {
         return Optional.ofNullable(thirdSelection);
     }
+
+
 }
