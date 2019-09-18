@@ -206,3 +206,5 @@ buildNumber.properties
 !/client/src/main/assembly/overlay/run-managementClient.sh
 !/client/src/main/assembly/overlay/run-fiscalClient.sh
 !/client/src/main/assembly/overlay/run-queryClient.sh
+!/setup_registry.sh
+!/server.sh
