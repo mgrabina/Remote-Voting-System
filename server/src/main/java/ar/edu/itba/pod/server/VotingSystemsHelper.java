@@ -129,7 +129,7 @@ public class VotingSystemsHelper {
             } else {
                 return null;
             }
-        }).collect(Collectors.toList());
+        }).filter(Objects::nonNull).collect(Collectors.toList());
     }
 
     /**

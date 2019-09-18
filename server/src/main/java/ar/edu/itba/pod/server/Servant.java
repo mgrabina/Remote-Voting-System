@@ -22,7 +22,7 @@ public class Servant extends UnicastRemoteObject implements AdministrationServic
     private VotingSystemsHelper votingSystemsHelper;
     private Object callbackLock = "callbackLock";
     private Object voteLock = "voteLock";
-    private final ExecutorService threadPool = Executors.newCachedThreadPool();
+    private final ExecutorService threadPool = Executors.newFixedThreadPool(15);
 
     Servant() throws RemoteException {
         super();
